@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NUR Enterprises - Master Inventory Valuation OS</title>
     
-    <!-- SheetJS & ChartJS & Supabase -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -116,7 +115,6 @@
     <main>
         <div id="alertBox"></div>
 
-        <!-- 1. DASHBOARD -->
         <div id="dashboard" class="panel active">
             <h2><i class="fas fa-boxes"></i> Live Master Valuation Control</h2>
             <div class="search-wrapper">
@@ -141,7 +139,6 @@
             </div>
         </div>
 
-        <!-- 2. ANALYTICS -->
         <div id="analytics" class="panel">
             <h2><i class="fas fa-chart-line"></i> Top Level Digital Trending & AI Insights</h2>
             <div class="analytics-grid">
@@ -160,7 +157,6 @@
             </div>
         </div>
 
-        <!-- 3. INGESTION -->
         <div id="upload" class="panel">
             <h2><i class="fas fa-dna"></i> 1000% Accuracy Data-Shape DNA Scanner</h2>
             <div id="kpoAuthWall">
@@ -192,7 +188,6 @@
             </div>
         </div>
 
-        <!-- 4. ARCHIVES -->
         <div id="history" class="panel">
             <h2><i class="fas fa-calendar-check"></i> Timestamped Historical Archives</h2>
             <div class="history-controls">
@@ -219,7 +214,6 @@
             </div>
         </div>
 
-        <!-- 5. REPORTS -->
         <div id="reports" class="panel">
             <h2><i class="fas fa-file-invoice-dollar"></i> VIP Level Financial Reporting</h2>
             <div class="report-stats">
@@ -237,7 +231,8 @@
     </main>
 
     <script>
-        const supabaseUrl = 'https://vngpwmsjvvaudcqiqgfw.supabase.co'; 
+        // THE FIX: The typo has been corrected (ogfw instead of qgfw)
+        const supabaseUrl = 'https://vngpwmsjvvaudcqiogfw.supabase.co'; 
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZuZ3B3bXNqdnZhdWRjcWlvZ2Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NjY4NzQsImV4cCI6MjA5NTI0Mjg3NH0.X46d6ckVs-SUDpweyVPxzxNUc3GqJunkIyQ_F1ivaP4';
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
