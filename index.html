@@ -5,292 +5,304 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NUR Enterprises - Master Inventory OS</title>
     
+    <!-- Enterprise Core Processing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            /* Enterprise Quantum Slate & Sapphire Palette */
-            --bg-obsidian: #050A15; 
-            --bg-panel: #0E1629;
-            --accent-light: #38BDF8; /* Sky Cyan */
-            --accent-base: #0EA5E9; /* Sapphire Blue */
-            --accent-dark: #0284C7; /* Deep Sea */
-            --accent-gradient: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 50%, #818CF8 100%);
+            /* Ultimate Obsidian & Rose-Gold / Magenta Theme */
+            --bg-obsidian: #030303; 
+            --bg-panel: #0a0a0a;
+            --rose-light: #FBCFE8; 
+            --rose-base: #F472B6; 
+            --rose-dark: #BE185D;
+            --gold-accent: #D4AF37;
+            --magenta-gradient: linear-gradient(135deg, #BE185D 0%, #F472B6 50%, #D4AF37 100%);
             
             --text-main: #F8FAFC; 
             --text-muted: #94A3B8;
-            --glass-border: rgba(56, 189, 248, 0.2); 
-            --glass-bg: rgba(14, 22, 41, 0.85);
-            --danger: #EF4444; 
+            --glass-border: rgba(244, 114, 182, 0.25); 
+            --glass-bg: rgba(10, 10, 10, 0.85);
+            --danger: #E11D48; 
             --zero-val: #475569;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; }
-        body { background: var(--bg-obsidian); background-image: radial-gradient(circle at 50% 0%, #0F172A 0%, transparent 70%); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: var(--bg-obsidian); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+        /* GLOBAL LOGIN FIREWALL */
+        #globalLoginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a0510 0%, #000 100%); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .login-box { background: rgba(10, 10, 10, 0.9); border: 1px solid var(--rose-dark); border-radius: 20px; padding: 4rem; text-align: center; box-shadow: 0 20px 60px rgba(190, 24, 93, 0.3); max-width: 500px; width: 90%; }
+        .login-box h1 { font-size: 2.5rem; letter-spacing: 4px; margin-bottom: 0.5rem; background: var(--magenta-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .login-box p { color: var(--rose-light); margin-bottom: 2.5rem; letter-spacing: 1px; font-weight: 600; }
+        .login-box input { width: 100%; padding: 1.2rem; background: #000; border: 1px solid var(--rose-dark); border-radius: 8px; color: #FFF; font-size: 1.1rem; margin-bottom: 1.5rem; outline: none; transition: 0.3s; text-align: center; letter-spacing: 2px;}
+        .login-box input:focus { border-color: var(--rose-base); box-shadow: 0 0 20px rgba(244, 114, 182, 0.2); }
+        .login-box .btn { width: 100%; justify-content: center; font-size: 1.2rem; padding: 1.2rem; }
+
+        /* APP WRAPPER (Hidden initially) */
+        #appWrapper { display: none; flex-direction: column; min-height: 100vh; }
 
         /* HEADER */
-        header { background: rgba(5, 10, 21, 0.95); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); padding: 1.5rem 2.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 30px rgba(0,0,0,0.5); }
-        header h1 { font-size: 2rem; letter-spacing: 2px; font-weight: 400; }
-        header h1 span { background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: 4px;}
+        header { background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); padding: 1.5rem 2.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 30px rgba(0,0,0,0.8); }
+        header h1 { font-size: 2rem; letter-spacing: 3px; font-weight: 300; }
+        header h1 span { background: var(--magenta-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
         .header-meta { text-align: right; font-size: 0.95rem; color: var(--text-muted); }
-        .header-meta strong { color: var(--accent-light); letter-spacing: 1.5px; }
+        .header-meta strong { color: var(--rose-base); letter-spacing: 1.5px; }
 
         /* NAVIGATION */
-        nav { background: rgba(14, 22, 41, 0.95); display: flex; padding: 0 2.5rem; border-bottom: 1px solid var(--glass-border); overflow-x: auto; scrollbar-width: none; }
-        .nav-tab { padding: 1.2rem 1.5rem; border: none; background: none; font-size: 1rem; font-weight: 600; color: #64748B; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease; white-space: nowrap; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.6rem; }
-        .nav-tab:hover { color: var(--accent-light); background: rgba(255,255,255,0.02); }
-        .nav-tab.active { color: var(--accent-light); border-bottom-color: var(--accent-base); text-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
+        nav { background: rgba(10, 10, 10, 0.95); display: flex; padding: 0 2.5rem; border-bottom: 1px solid var(--glass-border); overflow-x: auto; scrollbar-width: none; }
+        .nav-tab { padding: 1.2rem 1.5rem; border: none; background: none; font-size: 1.05rem; font-weight: 600; color: #64748B; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease; white-space: nowrap; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.6rem; }
+        .nav-tab:hover { color: var(--rose-light); background: rgba(255,255,255,0.02); }
+        .nav-tab.active { color: var(--rose-light); border-bottom-color: var(--rose-base); text-shadow: 0 0 20px rgba(244, 114, 182, 0.5); }
+
+        /* PINK GLASS BANNER */
+        .pink-glass-banner { background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(190, 24, 93, 0.05)); backdrop-filter: blur(12px); border: 1px solid rgba(244, 114, 182, 0.4); padding: 1.5rem 2.5rem; border-radius: 16px; display: inline-block; margin-bottom: 2.5rem; box-shadow: 0 10px 40px rgba(190, 24, 93, 0.2); }
+        .pink-glass-banner h3 { color: var(--rose-light); margin: 0 0 0.5rem 0; font-weight: 600; letter-spacing: 3px; font-size: 0.9rem; text-transform: uppercase; }
+        .pink-glass-banner h2 { color: #FFF; margin: 0; font-size: 2.5rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; border-bottom: none; padding-bottom: 0; display: inline; text-shadow: 0 2px 15px rgba(244,114,182,0.4); }
+        .pink-glass-banner i { color: var(--rose-base); margin-right: 1rem; }
 
         main { flex: 1; padding: 2.5rem; max-width: 1900px; width: 100%; margin: 0 auto; }
-        .panel { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 16px; padding: 2.5rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); display: none; }
+        .panel { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 2.5rem; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); display: none; }
         .panel.active { display: block; animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        h2 { margin-bottom: 2rem; color: var(--text-main); font-size: 1.6rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem; font-weight: 600; letter-spacing: 1px; }
-        h2 i { color: var(--accent-base); }
+        h2.panel-title { margin-bottom: 2rem; color: var(--text-main); font-size: 1.6rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem; font-weight: 600; letter-spacing: 1px; }
+        h2.panel-title i { color: var(--rose-base); }
 
-        /* ELITE SEARCH BAR */
+        /* SEARCH BAR */
         .search-wrapper { position: relative; width: 100%; max-width: 800px; margin-bottom: 2.5rem; }
-        .search-wrapper i { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.2rem; transition: 0.3s; }
-        .search-input { width: 100%; padding: 1.2rem 1.5rem 1.2rem 3.5rem; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: var(--text-main); font-size: 1.1rem; outline: none; transition: all 0.3s ease; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
-        .search-input::placeholder { color: #475569; font-weight: 400; }
-        .search-input:focus { border-color: var(--accent-base); box-shadow: 0 0 20px rgba(14, 165, 233, 0.2), inset 0 2px 10px rgba(0,0,0,0.5); background: rgba(0,0,0,0.6); }
-        .search-input:focus + i { color: var(--accent-light); }
+        .search-wrapper i { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.2rem; }
+        .search-input { width: 100%; padding: 1.2rem 1.5rem 1.2rem 3.5rem; background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: var(--text-main); font-size: 1.1rem; outline: none; transition: 0.3s; }
+        .search-input:focus { border-color: var(--rose-base); box-shadow: 0 0 20px rgba(190, 24, 93, 0.4); }
         
-        /* TABLE: FLAWLESS ANTI-OVERFLOW ARCHITECTURE */
-        .table-container { border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.2); max-height: 65vh; overflow-y: auto; overflow-x: auto; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; min-width: 1200px; }
-        th { background: #070B14; color: var(--accent-light); font-weight: 700; padding: 1.2rem; border-bottom: 2px solid var(--accent-dark); text-transform: uppercase; font-size: 0.8rem; position: sticky; top: 0; z-index: 10; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); white-space: nowrap; }
+        /* FLAWLESS TABLE & DARK VALUATION BOXES */
+        .table-container { border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.3); max-height: 65vh; overflow-y: auto; overflow-x: auto; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; min-width: 1300px; }
+        th { background: #050505; color: var(--rose-light); font-weight: 800; padding: 1.2rem; border-bottom: 2px solid var(--rose-dark); text-transform: uppercase; font-size: 0.85rem; position: sticky; top: 0; z-index: 10; letter-spacing: 1px; white-space: nowrap; }
         td { padding: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-main); vertical-align: middle; }
-        tr:hover td { background: rgba(14, 165, 233, 0.05); }
+        tr:hover td { background: rgba(244, 114, 182, 0.05); }
         
-        .desc-cell { min-width: 300px; max-width: 450px; word-wrap: break-word; white-space: normal; line-height: 1.5; font-weight: 500; }
-        .data-cell { white-space: nowrap; }
-        .qty-text { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem; color: #E2E8F0; }
-        .val-text { font-size: 0.9rem; font-weight: 600; color: var(--accent-light); }
-        .total-col { background: rgba(14, 165, 233, 0.03); border-left: 1px solid var(--glass-border); min-width: 200px; }
-        .total-val { color: var(--accent-light); font-size: 1.3rem; font-weight: 800; letter-spacing: 0.5px; }
-        .size-badge { display: inline-block; padding: 0.3rem 0.6rem; background: rgba(14, 165, 233, 0.15); color: var(--accent-light); border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-top: 0.6rem; border: 1px solid rgba(56, 189, 248, 0.3); letter-spacing: 1px;}
-
-        /* BUTTONS */
-        .btn { background: var(--accent-gradient); color: #FFF; border: none; padding: 1rem 2rem; border-radius: 8px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.8rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); transition: 0.3s; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(14, 165, 233, 0.6); filter: brightness(1.1); }
-        .btn-outline { background: rgba(0,0,0,0.5); border: 1px solid var(--accent-base); color: var(--accent-light); box-shadow: none; }
+        .desc-cell { min-width: 250px; max-width: 350px; word-wrap: break-word; white-space: normal; line-height: 1.5; font-weight: 600; }
+        .qty-text { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; color: #E2E8F0; }
         
-        /* ALERTS */
-        #alertBox { padding: 1.2rem 2rem; border-radius: 8px; margin-bottom: 2rem; display: none; font-weight: 600; text-align: left; font-size: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border-left: 4px solid; animation: fadeIn 0.3s; }
-        .alert-good { background: rgba(16, 185, 129, 0.1); color: #34D399; border-color: #10B981; }
-        .alert-bad { background: rgba(239, 68, 68, 0.1); color: #F87171; border-color: #EF4444; }
-        .alert-sync { background: rgba(56, 189, 248, 0.1); color: var(--accent-light); border-color: var(--accent-base); }
-
-        /* EXECUTIVE DASHBOARD & STATS */
-        .report-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 3.5rem; }
-        .stat-box { background: rgba(15, 23, 42, 0.6); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); position: relative; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: 0.3s; }
-        .stat-box:hover { border-color: var(--accent-base); transform: translateY(-3px); }
-        .stat-box h4 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.8rem; font-weight: 600; }
-        .stat-box .value { font-size: clamp(1.8rem, 2vw, 2.2rem); color: var(--text-main); font-weight: 800; letter-spacing: -0.5px; }
-        .stat-box .sub-value { font-size: 0.95rem; color: var(--accent-base); margin-top: 0.5rem; font-weight: 600; }
+        /* The Dark Box Fix for Overflows */
+        .val-box { background: #050505; border: 1px solid var(--rose-dark); color: var(--gold-accent); padding: 0.6rem 1rem; border-radius: 6px; white-space: nowrap; font-weight: 800; font-size: 1rem; display: inline-block; box-shadow: inset 0 2px 10px rgba(0,0,0,0.8); min-width: 140px; text-align: right; letter-spacing: 1px; }
+        .val-box.master-val { border-color: var(--gold-accent); background: #110e05; color: #FFF; font-size: 1.2rem; min-width: 180px; }
         
-        .master-box { grid-column: 1 / -1; background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(14, 165, 233, 0.1)); border: 1px solid var(--accent-base); text-align: center; padding: 3rem; }
-        .master-box .value { background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: clamp(3rem, 4vw, 4.5rem); letter-spacing: -1px; }
-        .master-box .sub-value { font-size: 1.2rem; color: var(--accent-light); margin-top: 1rem; }
+        .size-badge { display: inline-block; padding: 0.3rem 0.6rem; background: rgba(190, 24, 93, 0.2); color: var(--rose-light); border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-top: 0.6rem; border: 1px solid var(--rose-dark); }
+        .brand-badge { display: inline-block; padding: 0.3rem 0.6rem; background: rgba(212, 175, 55, 0.15); color: var(--gold-accent); border-radius: 4px; font-size: 0.75rem; font-weight: 800; margin-top: 0.6rem; margin-right: 0.5rem; border: 1px solid var(--gold-accent); }
 
-        /* INGESTION & UPLOAD */
+        /* BUTTONS & ALERTS */
+        .btn { background: var(--magenta-gradient); color: #FFF; border: none; padding: 1rem 2rem; border-radius: 8px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 0.8rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(190, 24, 93, 0.4); transition: 0.3s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(190, 24, 93, 0.6); filter: brightness(1.1); }
+        .btn-outline { background: #000; border: 1px solid var(--rose-base); color: var(--rose-light); box-shadow: none; }
+        .btn-danger { background: #000; border: 1px solid var(--danger); color: var(--danger); }
+        
+        #alertBox { padding: 1.2rem 2rem; border-radius: 8px; margin-bottom: 2rem; display: none; font-weight: 600; text-align: left; font-size: 1.1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.6); border-left: 5px solid; }
+        .alert-good { background: rgba(16, 185, 129, 0.15); color: #34D399; border-color: #10B981; }
+        .alert-bad { background: rgba(225, 29, 72, 0.15); color: #FDA4AF; border-color: #E11D48; }
+
+        /* EXECUTIVE DASHBOARD SEPARATED STATS */
+        .report-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3.5rem; }
+        .stat-box { background: rgba(10, 10, 10, 0.8); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); position: relative; display: flex; flex-direction: column; justify-content: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); transition: 0.3s; }
+        .stat-box:hover { border-color: var(--rose-base); }
+        .stat-box h4 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.8rem; font-weight: 700; }
+        .stat-box .value { font-size: clamp(1.6rem, 2vw, 2rem); color: var(--text-main); font-weight: 900; letter-spacing: 1px; }
+        .stat-box .sub-value { font-size: 0.95rem; color: var(--rose-base); margin-top: 0.5rem; font-weight: 600; }
+        
+        .master-box { grid-column: 1 / -1; background: linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(190, 24, 93, 0.15)); border: 1px solid var(--rose-base); text-align: center; padding: 3rem; }
+        .master-box .value { background: var(--magenta-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: clamp(3rem, 4vw, 4.5rem); letter-spacing: 2px; }
+
+        /* USER MANAGEMENT */
+        .user-grid { display: grid; grid-template-columns: 350px 1fr; gap: 2rem; }
+        .user-form { background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 12px; border: 1px solid var(--glass-border); }
+        .user-form input, .user-form select { width: 100%; padding: 1rem; background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #FFF; margin-bottom: 1.5rem; font-size: 1rem; outline: none; }
+        .user-form input:focus { border-color: var(--rose-base); }
+        
+        /* INGESTION & ANALYTICS */
         .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
-        .upload-card { background: rgba(0, 0, 0, 0.2); border: 1px dashed rgba(255,255,255,0.2); padding: 3rem 2rem; border-radius: 12px; text-align: center; transition: 0.3s; }
-        .upload-card:hover { border-color: var(--accent-light); background: rgba(14, 165, 233, 0.05); }
-        .upload-card input[type="file"] { width: 100%; padding: 1rem; background: rgba(0,0,0,0.5); border-radius: 8px; color: var(--text-muted); margin-bottom: 1rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); }
-        .status-badge { display: inline-block; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; margin-top: 1rem; display: none; background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid #10B981; }
+        .upload-card { background: rgba(0, 0, 0, 0.4); border: 1px dashed var(--rose-dark); padding: 3rem 2rem; border-radius: 12px; text-align: center; }
+        .upload-card input[type="file"] { width: 100%; padding: 1rem; background: #000; border-radius: 8px; color: var(--text-muted); margin-bottom: 1rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
         
-        #kpoAuthWall { background: rgba(15, 23, 42, 0.8); border: 1px solid var(--glass-border); border-radius: 16px; padding: 4rem; text-align: center; max-width: 550px; margin: 0 auto 3rem auto; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-        #kpoAuthWall input { width: 100%; padding: 1.2rem; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-main); font-size: 1.5rem; margin-bottom: 2rem; text-align: center; letter-spacing: 5px; transition: 0.3s; }
-        #kpoAuthWall input:focus { border-color: var(--accent-base); outline: none; }
-        #kpoWorkspace { display: none; }
-        
-        /* ANALYTICS */
         .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
-        .chart-container { background: rgba(15, 23, 42, 0.4); border-radius: 12px; padding: 2rem; border: 1px solid rgba(255,255,255,0.05); min-height: 400px; display: flex; flex-direction: column; }
-        .chart-title { color: var(--text-main); font-size: 1rem; font-weight: 600; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem; }
+        .chart-container { background: rgba(10, 10, 10, 0.6); border-radius: 12px; padding: 2rem; border: 1px solid rgba(255,255,255,0.05); min-height: 400px; display: flex; flex-direction: column; }
+        .chart-title { color: var(--text-main); font-size: 1rem; font-weight: 700; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem; }
         .chart-wrapper { flex: 1; position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
 
-        .history-controls { display: flex; gap: 1rem; align-items: center; background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; }
-        .date-picker { padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); color: var(--text-main); font-size: 1rem; flex: 1; min-width: 300px; outline: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div>
-            <h1>NUR <span>ENTERPRISES</span></h1>
-            <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.4rem; letter-spacing: 3px; font-weight: 600; text-transform: uppercase;">Global Live Valuation Engine</div>
+    <!-- SECURE LOGIN FIREWALL -->
+    <div id="globalLoginOverlay">
+        <div class="login-box">
+            <h1>NUR <span>OS</span></h1>
+            <p>GLOBAL ENTERPRISE FIREWALL</p>
+            <input type="text" id="loginUsername" placeholder="Username" autocomplete="off">
+            <input type="password" id="loginPassword" placeholder="Password" onkeypress="if(event.key === 'Enter') executeLogin()">
+            <button class="btn" onclick="executeLogin()"><i class="fas fa-unlock-alt"></i> Authenticate Session</button>
         </div>
-        <div class="header-meta">
-            <div>Architect: <strong style="letter-spacing: 2px;">DILAWAR ALI</strong></div>
-            <div id="liveClock" style="margin-top: 0.5rem; font-weight: 600; font-family: monospace; font-size: 1.1rem; color: var(--text-main);"></div>
-            <div id="syncStatus" style="margin-top: 0.5rem; font-size: 0.8rem; color: #34D399; font-weight: 600;"><i class="fas fa-satellite-dish"></i> Connected to Supabase Node</div>
-        </div>
-    </header>
+    </div>
 
-    <nav>
-        <button id="tab-dashboard" class="nav-tab active" onclick="switchPanel('dashboard')"><i class="fas fa-table"></i> Master Stock Board</button>
-        <button id="tab-executive" class="nav-tab" onclick="switchPanel('executive')"><i class="fas fa-chart-line"></i> Executive Boardroom</button>
-        <button id="tab-analytics" class="nav-tab" onclick="switchPanel('analytics')"><i class="fas fa-layer-group"></i> AI Analytics & Trends</button>
-        <button id="tab-reports" class="nav-tab" onclick="switchPanel('reports')"><i class="fas fa-file-pdf"></i> Global Reports & Export</button>
-        <button id="tab-history" class="nav-tab" onclick="switchPanel('history')"><i class="fas fa-history"></i> Historical Vault</button>
-        <button id="tab-upload" class="nav-tab" onclick="switchPanel('upload')"><i class="fas fa-server"></i> Data DNA Ingestion</button>
-    </nav>
-
-    <main>
-        <div id="alertBox"></div>
-
-        <div id="dashboard" class="panel active">
-            <h2><i class="fas fa-table"></i> Live Master Valuation Control</h2>
-            <div class="search-wrapper">
-                <input type="text" id="masterSearch" class="search-input" placeholder="Live Search by SKU Code, English Description, or Size (e.g. 110G)..." autocomplete="off" oninput="executeSearch()">
-                <i class="fas fa-search"></i>
+    <!-- MAIN APPLICATION -->
+    <div id="appWrapper">
+        <header>
+            <div>
+                <h1>NUR <span>ENTERPRISES</span></h1>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.4rem; letter-spacing: 3px; font-weight: 600; text-transform: uppercase;">Global Live Valuation Engine</div>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>SKU Code</th>
-                            <th>Product Description</th>
-                            <th>RT Inventory (CTN/PCS)</th>
-                            <th>VSP Inventory (CTN/PCS)</th>
-                            <th>WS Inventory (CTN/PCS)</th>
-                            <th class="total-col">Total SKU Valuation (Rs)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryBody">
-                        <tr><td colspan="6" style="text-align:center; padding:5rem; color:var(--text-muted);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Syncing from Live Database...</td></tr>
-                    </tbody>
-                </table>
+            <div class="header-meta">
+                <div>Architect: <strong style="letter-spacing: 2px;">DILAWAR ALI</strong></div>
+                <div id="liveClock" style="margin-top: 0.5rem; font-weight: 600; font-family: monospace; font-size: 1.1rem; color: var(--text-main);"></div>
+                <div id="syncStatus" style="margin-top: 0.5rem; font-size: 0.8rem; color: #34D399; font-weight: 600;"><i class="fas fa-satellite-dish"></i> Connected to Supabase Node</div>
             </div>
-        </div>
+        </header>
 
-        <div id="executive" class="panel">
-            <h2><i class="fas fa-chart-line"></i> Board of Directors View</h2>
-            <p style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 1.05rem;">Top-level financial metrics converted into readable millions/billions for rapid executive decision making.</p>
-            
-            <div class="report-stats">
-                <div class="stat-box master-box">
-                    <h4>Grand Total Global Value</h4>
-                    <div class="value" id="execGrandTotal">Rs 0.00</div>
-                    <div class="sub-value" id="execGrandWords">0.00 Million</div>
+        <nav>
+            <button id="tab-dashboard" class="nav-tab active" onclick="switchPanel('dashboard')"><i class="fas fa-table"></i> Master Stock Board</button>
+            <button id="tab-executive" class="nav-tab" onclick="switchPanel('executive')"><i class="fas fa-crown"></i> Executive Boardroom</button>
+            <button id="tab-analytics" class="nav-tab" onclick="switchPanel('analytics')"><i class="fas fa-chart-pie"></i> AI Smart Charts</button>
+            <button id="tab-reports" class="nav-tab" onclick="switchPanel('reports')"><i class="fas fa-file-excel"></i> Executive Reports</button>
+            <button id="tab-upload" class="nav-tab" onclick="switchPanel('upload')"><i class="fas fa-server"></i> Data DNA Ingestion</button>
+            <button id="tab-users" class="nav-tab" onclick="switchPanel('users')" style="display:none;"><i class="fas fa-users-cog"></i> User Management</button>
+            <button class="nav-tab" onclick="executeLogout()" style="margin-left: auto; color: var(--danger);"><i class="fas fa-sign-out-alt"></i> Terminate Session</button>
+        </nav>
+
+        <main>
+            <div id="alertBox"></div>
+
+            <!-- Dashboard Title / Pink Glass -->
+            <div class="pink-glass-banner">
+                <h3><i class="fas fa-gem"></i> Area Sales Manager</h3>
+                <h2>Miss Rida Nawaz</h2>
+            </div>
+
+            <!-- 1. DASHBOARD -->
+            <div id="dashboard" class="panel active">
+                <h2 class="panel-title"><i class="fas fa-table"></i> Live Master Valuation Control</h2>
+                <div class="search-wrapper">
+                    <input type="text" id="masterSearch" class="search-input" placeholder="Live Search by SKU Code, Brand, Description, or Size..." autocomplete="off" oninput="executeSearch()">
+                    <i class="fas fa-search"></i>
                 </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>SKU Code</th>
+                                <th>Product Details & Brand</th>
+                                <th>Retail (RT) Data</th>
+                                <th>VSP Data</th>
+                                <th>Wholesale (WS) Data</th>
+                                <th class="total-col">Total SKU Valuation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryBody">
+                            <tr><td colspan="6" style="text-align:center; padding:5rem; color:var(--text-muted);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Syncing from Live Database...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. EXECUTIVE BOARDROOM -->
+            <div id="executive" class="panel">
+                <h2 class="panel-title"><i class="fas fa-crown"></i> Board of Directors View</h2>
                 
-                <div class="stat-box">
-                    <h4>Highly Liquid Capital (Retail + VSP)</h4>
-                    <div class="value" id="execLiquidVal">Rs 0.00</div>
-                    <div class="sub-value" id="execLiquidWords">0.00 Million</div>
+                <div class="report-stats">
+                    <div class="stat-box master-box">
+                        <h4>Grand Total Global Value</h4>
+                        <div class="value" id="execGrandTotal">Rs 0.00</div>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Retail Network Capital (RT)</h4>
+                        <div class="value" id="execRtVal">Rs 0.00</div>
+                        <div class="sub-value" id="execRtWords">0.00 Million</div>
+                    </div>
+                    <div class="stat-box">
+                        <h4>VSP Channel Capital</h4>
+                        <div class="value" id="execVspVal">Rs 0.00</div>
+                        <div class="sub-value" id="execVspWords">0.00 Million</div>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Wholesale Locked Capital (WS)</h4>
+                        <div class="value" id="execWsVal">Rs 0.00</div>
+                        <div class="sub-value" id="execWsWords">0.00 Million</div>
+                    </div>
                 </div>
+            </div>
+
+            <!-- 3. AI SMART CHARTS -->
+            <div id="analytics" class="panel">
+                <h2 class="panel-title"><i class="fas fa-chart-pie"></i> AI Smart Analytics & Trends</h2>
+                <div class="analytics-grid">
+                    <div class="chart-container">
+                        <div class="chart-title">Top 7 Products by Valuation</div>
+                        <p style="text-align:center; font-size:0.85rem; color:var(--text-muted); margin-top:-10px; margin-bottom:10px;">Includes exact SKU Names & Codes</p>
+                        <div class="chart-wrapper"><canvas id="chartTopSkus"></canvas></div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Capital by Brand Family</div>
+                        <p style="text-align:center; font-size:0.85rem; color:var(--text-muted); margin-top:-10px; margin-bottom:10px;">AI clustered by exact brand terminology</p>
+                        <div class="chart-wrapper"><canvas id="chartBrands"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. EXECUTIVE EXPORTS -->
+            <div id="reports" class="panel">
+                <h2 class="panel-title"><i class="fas fa-file-excel"></i> Top-Level Financial Reporting</h2>
                 
-                <div class="stat-box">
-                    <h4>Wholesale Locked Capital (WS)</h4>
-                    <div class="value" id="execLockedVal">Rs 0.00</div>
-                    <div class="sub-value" id="execLockedWords">0.00 Million</div>
-                </div>
-
-                <div class="stat-box">
-                    <h4>Total Active Asset Classes</h4>
-                    <div class="value" id="execSkuCount" style="color: var(--text-main);">0</div>
-                    <div class="sub-value">Unique SKUs Holding Value</div>
+                <div class="upload-grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
+                    <div class="upload-card" style="padding: 4rem 2rem;">
+                        <i class="fas fa-file-excel fa-4x" style="color: #10B981; margin-bottom: 1.5rem;"></i>
+                        <h3 style="margin-bottom: 0.5rem; color: var(--text-main); font-weight: 800;">Master Inventory Excel</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 2rem;">Perfectly formatted Excel document with In-Hand Quantities, Brands, and precise channels. Authorized by Miss Rida Nawaz.</p>
+                        <button class="btn" onclick="exportEnterpriseExcel()"><i class="fas fa-download"></i> Download Excel Report</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div id="analytics" class="panel">
-            <h2><i class="fas fa-layer-group"></i> Top Level Digital Trending & AI Insights</h2>
-            <div class="analytics-grid">
-                <div class="chart-container">
-                    <div class="chart-title">Global Valuation by Channel</div>
-                    <div class="chart-wrapper"><canvas id="chartChannel"></canvas></div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">Top 7 Most Valuable SKUs</div>
-                    <div class="chart-wrapper"><canvas id="chartTopSkus"></canvas></div>
-                </div>
-                <div class="chart-container" style="grid-column: 1 / -1;">
-                    <div class="chart-title">AI Grams/Volume (Size) Concentration</div>
-                    <div class="chart-wrapper" style="height: 350px;"><canvas id="chartSizeDist"></canvas></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="reports" class="panel">
-            <h2><i class="fas fa-file-pdf"></i> Enterprise Table Generation & Export</h2>
-            <p style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 1.05rem;">Generate flawlessly formatted, paginated PDF documents for formal presentations and printing.</p>
-            
-            <div class="upload-grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
-                <div class="upload-card" style="padding: 4rem 2rem;">
-                    <i class="fas fa-file-pdf fa-4x" style="color: var(--danger); margin-bottom: 1.5rem;"></i>
-                    <h3 style="margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600;">Master Valuation PDF</h3>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Complete inventory ledger in perfect table format.</p>
-                    <button class="btn" onclick="exportEnterprisePDF('master')"><i class="fas fa-download"></i> Generate PDF Table</button>
-                </div>
-
-                <div class="upload-card" style="padding: 4rem 2rem;">
-                    <i class="fas fa-file-csv fa-4x" style="color: #10B981; margin-bottom: 1.5rem;"></i>
-                    <h3 style="margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600;">Raw Data Dump (CSV)</h3>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem;">For importing directly into other accounting softwares.</p>
-                    <button class="btn btn-outline" onclick="exportEnterpriseCSV()"><i class="fas fa-download"></i> Export Raw CSV</button>
+            <!-- 5. USER MANAGEMENT (Admin Only) -->
+            <div id="users" class="panel">
+                <h2 class="panel-title"><i class="fas fa-users-cog"></i> Global Access Management</h2>
+                <div class="user-grid">
+                    <div class="user-form">
+                        <h3 style="margin-bottom: 1.5rem; color: var(--rose-light);">Create / Update Access</h3>
+                        <input type="text" id="newUsername" placeholder="New Username" autocomplete="off">
+                        <input type="text" id="newPassword" placeholder="Default Password (Changeable)">
+                        <select id="newRole">
+                            <option value="user">Standard User (View Only)</option>
+                            <option value="master">Master Admin (Full Access)</option>
+                        </select>
+                        <button class="btn" style="width: 100%; justify-content: center;" onclick="createNewUser()"><i class="fas fa-user-plus"></i> Provision Access</button>
+                    </div>
+                    <div class="table-container" style="max-height: 500px;">
+                        <table>
+                            <thead><tr><th>Username</th><th>Clearance Level</th><th>Actions</th></tr></thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div id="history" class="panel">
-            <h2><i class="fas fa-history"></i> Timestamped Historical Vault</h2>
-            <div class="history-controls">
-                <select id="archiveDateSelect" class="date-picker"><option value="">-- Fetching Vault Records... --</option></select>
-                <button class="btn" onclick="loadArchiveData()"><i class="fas fa-eye"></i> Open Ledger</button>
-            </div>
-            <div class="table-container">
-                <table id="archiveTable">
-                    <thead>
-                        <tr>
-                            <th>SKU Code</th>
-                            <th>Product Description</th>
-                            <th>RT Value</th>
-                            <th>VSP Value</th>
-                            <th>WS Value</th>
-                            <th class="total-col">Historical Valuation (Rs)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="archiveBody">
-                        <tr><td colspan="6" style="text-align:center; padding:5rem; color:var(--text-muted);">Select a timestamp above and click Open Ledger.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="upload" class="panel">
-            <h2><i class="fas fa-server"></i> 1000% Accuracy Data-Shape DNA Scanner</h2>
-            <div id="kpoAuthWall">
-                <h3 style="color: var(--danger); margin-bottom: 1rem; font-weight: 600;"><i class="fas fa-lock"></i> KPO Authentication Required</h3>
-                <input type="password" id="kpoPass" placeholder="••••••••" onkeypress="if(event.key === 'Enter') authKPO()">
-                <button class="btn" onclick="authKPO()" style="width: 100%; justify-content: center;"><i class="fas fa-key"></i> Unlock System</button>
-            </div>
-            <div id="kpoWorkspace">
+            <!-- 6. INGESTION -->
+            <div id="upload" class="panel">
+                <h2 class="panel-title"><i class="fas fa-server"></i> Data-Shape DNA Scanner</h2>
                 <div class="upload-grid">
                     <div class="upload-card">
-                        <h3 style="color: var(--text-main); font-weight: 600;"><i class="fas fa-store" style="color: var(--accent-light);"></i> Retail (RT)</h3>
+                        <h3 style="color: var(--text-main); font-weight: 600;"><i class="fas fa-store" style="color: var(--rose-base);"></i> Retail (RT)</h3>
                         <input type="file" id="fileRT" accept=".xlsx, .xls, .csv" onchange="parsePrecisionERP('rt')">
                         <div id="badge-rt" class="status-badge"></div>
                     </div>
                     <div class="upload-card">
-                        <h3 style="color: var(--text-main); font-weight: 600;"><i class="fas fa-shopping-cart" style="color: var(--accent-light);"></i> LMT (VSP)</h3>
+                        <h3 style="color: var(--text-main); font-weight: 600;"><i class="fas fa-shopping-cart" style="color: var(--rose-base);"></i> LMT (VSP)</h3>
                         <input type="file" id="fileVSP" accept=".xlsx, .xls, .csv" onchange="parsePrecisionERP('vsp')">
                         <div id="badge-vsp" class="status-badge"></div>
                     </div>
                     <div class="upload-card">
-                        <h3 style="color: var(--text-main); font-weight: 600;"><i class="fas fa-truck-loading" style="color: var(--accent-light);"></i> Whole Sale (WS)</h3>
+                        <h3 style="color: var(--text-main); font-weight: 600;"><i class="fas fa-truck-loading" style="color: var(--rose-base);"></i> Whole Sale (WS)</h3>
                         <input type="file" id="fileWS" accept=".xlsx, .xls, .csv" onchange="parsePrecisionERP('ws')">
                         <div id="badge-ws" class="status-badge"></div>
                     </div>
@@ -299,33 +311,102 @@
                     <button class="btn" onclick="commitDailyWipeAndUpdate()"><i class="fas fa-cloud-upload-alt"></i> Execute Global Server Sync</button>
                 </div>
             </div>
-        </div>
 
-    </main>
+        </main>
+    </div>
 
     <script>
-        // Supabase DB Connection
         const supabaseUrl = 'https://vngpwmsjvvaudcqiogfw.supabase.co'; 
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZuZ3B3bXNqdnZhdWRjcWlvZ2Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NjY4NzQsImV4cCI6MjA5NTI0Mjg3NH0.X46d6ckVs-SUDpweyVPxzxNUc3GqJunkIyQ_F1ivaP4';
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         let masterDB = {}; 
-        let historicalArchives = []; 
         let tempIngestion = { rt: null, vsp: null, ws: null };
-        let activeArchiveView = null;
         let chartInstances = {}; 
+        let currentSessionUser = null;
 
-        window.onload = async () => {
+        window.onload = () => {
             startClock();
-            document.getElementById('kpoAuthWall').style.display = 'block';
-            document.getElementById('kpoWorkspace').style.display = 'none';
-            await loadLiveServerData();
         };
 
         function startClock() {
             setInterval(() => { document.getElementById('liveClock').innerText = new Date().toLocaleString('en-US', { timeZone: 'Asia/Karachi' }); }, 1000);
         }
 
+        // --- AUTHENTICATION ENGINE ---
+        async function executeLogin() {
+            const u = document.getElementById('loginUsername').value.trim();
+            const p = document.getElementById('loginPassword').value.trim();
+            if(!u || !p) return alert("Credentials required.");
+
+            try {
+                const { data, error } = await db.from('nur_users').select('*').eq('username', u).eq('password', p).single();
+                
+                if (data) {
+                    currentSessionUser = data;
+                    document.getElementById('globalLoginOverlay').style.display = 'none';
+                    document.getElementById('appWrapper').style.display = 'flex';
+                    
+                    if(data.role === 'master') {
+                        document.getElementById('tab-users').style.display = 'flex';
+                    }
+                    await loadLiveServerData();
+                    switchPanel('dashboard');
+                } else {
+                    alert("Authorization Denied. Invalid User Configuration.");
+                }
+            } catch (err) {
+                alert("Database connection fault. Ensure nur_users SQL table is created.");
+            }
+        }
+
+        function executeLogout() {
+            currentSessionUser = null;
+            document.getElementById('appWrapper').style.display = 'none';
+            document.getElementById('globalLoginOverlay').style.display = 'flex';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // --- USER MANAGEMENT ---
+        async function loadUsers() {
+            if(currentSessionUser.role !== 'master') return;
+            const { data } = await db.from('nur_users').select('*');
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            if(data) {
+                data.forEach(u => {
+                    tbody.innerHTML += `<tr>
+                        <td><strong style="color:var(--text-main); font-size:1.1rem;">${u.username}</strong></td>
+                        <td><span class="brand-badge" style="${u.role==='master'?'color:var(--danger); border-color:var(--danger);':''}">${u.role.toUpperCase()}</span></td>
+                        <td><button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="deleteUser('${u.id}')">Delete</button></td>
+                    </tr>`;
+                });
+            }
+        }
+
+        async function createNewUser() {
+            const u = document.getElementById('newUsername').value.trim();
+            const p = document.getElementById('newPassword').value.trim();
+            const r = document.getElementById('newRole').value;
+            if(!u || !p) return showAlert('Missing fields', 'bad');
+
+            const { error } = await db.from('nur_users').insert([{ username: u, password: p, role: r }]);
+            if(error) return showAlert('User creation failed (Username might exist).', 'bad');
+            
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            showAlert('Access Provisioned Successfully', 'good');
+            loadUsers();
+        }
+
+        async function deleteUser(id) {
+            if(!confirm("Eradicate this user's access?")) return;
+            await db.from('nur_users').delete().eq('id', id);
+            showAlert('User Access Terminated', 'good');
+            loadUsers();
+        }
+
+        // --- UI NAVIGATION ---
         window.switchPanel = function(panelId) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -334,8 +415,8 @@
 
             if(panelId === 'dashboard') renderTable();
             if(panelId === 'executive') buildExecutiveBoardroom();
-            if(panelId === 'history') refreshArchiveDropdown();
             if(panelId === 'analytics') renderAnalytics(); 
+            if(panelId === 'users') loadUsers();
         };
 
         function showAlert(msg, type='good') {
@@ -344,50 +425,37 @@
             box.innerHTML = `<i class="fas ${type === 'good' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> &nbsp; ${msg}`;
             box.style.display = 'block';
             window.scrollTo({top: 0, behavior: 'smooth'});
-            setTimeout(() => box.style.display = 'none', 6000);
+            setTimeout(() => box.style.display = 'none', 5000);
         }
 
-        // --- MATH FORMATTING (Millions/Billions) ---
+        // --- MATH & UTILS ---
         function formatCurrency(val) { return "Rs " + val.toLocaleString('en-US', {minimumFractionDigits: 2}); }
         function formatQty(c, p) { return (c === 0 && p === 0) ? "0/0" : `${c}/${p}`; }
-        
         function formatToMillionsWords(val) {
             if (val === 0) return "0.00";
-            if (val >= 1000000000) return (val / 1000000000).toFixed(2) + " Billion";
             if (val >= 1000000) return (val / 1000000).toFixed(2) + " Million";
             if (val >= 1000) return (val / 1000).toFixed(2) + " Thousand";
             return val.toFixed(2);
         }
 
+        function extractBrand(desc) {
+            // Extracts first word before a comma or space as Brand AI assumption
+            if(!desc) return "UNBRANDED";
+            let parts = desc.split(',');
+            if(parts.length > 0) return parts[0].split(' ')[0].toUpperCase();
+            return "UNBRANDED";
+        }
+
         async function loadLiveServerData() {
             try {
-                const { data: liveData, error: liveErr } = await db.from('live_inventory').select('*');
-                if (liveErr) throw new Error("Load DB Error: " + liveErr.message);
-                
+                const { data: liveData } = await db.from('live_inventory').select('*');
                 masterDB = {};
                 if (liveData) liveData.forEach(item => { masterDB[item.sku_code] = item; });
-
-                const { data: histData } = await db.from('historical_archives').select('archive_date');
-                if (histData) historicalArchives = [...new Set(histData.map(i => i.archive_date))].filter(Boolean);
-            } catch (err) {
-                console.error(err);
-                showAlert('Could not load live data: ' + err.message, 'bad');
-            } finally {
-                renderTable();
-            }
+            } catch (err) { console.error(err); } 
+            finally { renderTable(); }
         }
 
-        function authKPO() {
-            const pass = document.getElementById('kpoPass').value;
-            if (pass === 'Aa135135%') {
-                document.getElementById('kpoAuthWall').style.display = 'none';
-                document.getElementById('kpoWorkspace').style.display = 'block';
-                showAlert('VIP Access Granted. Enterprise Ingestion Ready.', 'good');
-            } else {
-                showAlert('Authorization Failed: Incorrect credentials.', 'bad');
-            }
-        }
-
+        // --- INGESTION SCANNER ---
         function extractSKUSize(desc) {
             const regex = /(\d+(?:\.\d+)?\s*(?:ML|G|KG|LTR|L|GM|OZ|MG|GRAM|LITER))/i;
             const match = desc.match(regex);
@@ -455,10 +523,7 @@
 
         async function commitDailyWipeAndUpdate() {
             showAlert('Syncing tables to Global Node...', 'sync');
-            const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Asia/Karachi' });
-            
             try {
-                // 1. Build Payload First
                 let newDB = {};
                 let itemsExtracted = 0;
                 ['rt', 'vsp', 'ws'].forEach(ch => {
@@ -480,28 +545,11 @@
                 });
 
                 const livePayload = Object.values(newDB);
-                if (livePayload.length === 0) throw new Error("No data extracted. Please upload valid Excel files.");
+                if (livePayload.length === 0) throw new Error("No data extracted. Upload valid Excel files.");
 
-                // 2. Archive Old Data
-                if(Object.keys(masterDB).length > 0) {
-                    const archPayload = Object.values(masterDB).map(i => ({
-                        archive_date: timestamp, sku_code: i.sku_code, name: i.name, size: i.size,
-                        rt_c: i.rt_c, rt_p: i.rt_p, rt_val: i.rt_val,
-                        vsp_c: i.vsp_c, vsp_p: i.vsp_p, vsp_val: i.vsp_val,
-                        ws_c: i.ws_c, ws_p: i.ws_p, ws_val: i.ws_val
-                    }));
-                    const { error: archErr } = await db.from('historical_archives').insert(archPayload);
-                    if (archErr) throw new Error("Archive Blocked: " + archErr.message);
-                }
+                await db.from('live_inventory').delete().neq('sku_code', 'WIPE_000');
+                await db.from('live_inventory').insert(livePayload);
 
-                // 3. Wipe and Insert
-                const { error: wipeErr } = await db.from('live_inventory').delete().neq('sku_code', 'WIPE_000');
-                if (wipeErr) throw new Error("Wipe Blocked: " + wipeErr.message);
-
-                const { error: insErr } = await db.from('live_inventory').insert(livePayload);
-                if (insErr) throw new Error("Insert Blocked: " + insErr.message);
-
-                // 4. Cleanup
                 tempIngestion = { rt: null, vsp: null, ws: null };
                 ['rt', 'vsp', 'ws'].forEach(ch => {
                     document.getElementById(`file${ch.toUpperCase()}`).value = '';
@@ -511,35 +559,38 @@
                 await loadLiveServerData();
                 switchPanel('dashboard');
                 showAlert('Global Sync Complete! Database is live.', 'good');
-            } catch (err) { 
-                console.error(err);
-                showAlert('CRITICAL FAIL: ' + err.message, 'bad'); 
-            }
+            } catch (err) { showAlert('CRITICAL FAIL: ' + err.message, 'bad'); }
         }
 
-        // --- DASHBOARD TABLE RENDER ---
+        // --- DASHBOARD RENDER ---
         function renderTable(filterText = "") {
             const tbody = document.getElementById('inventoryBody');
             if(!tbody) return; tbody.innerHTML = '';
             const keys = Object.keys(masterDB);
             
             if(keys.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 5rem;">Awaiting server inventory injection. Upload files in Data DNA.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 5rem;">Awaiting server inventory injection.</td></tr>`;
                 return;
             }
 
             keys.forEach(code => {
                 const item = masterDB[code];
-                if(code.toLowerCase().includes(filterText.toLowerCase()) || item.name.toLowerCase().includes(filterText.toLowerCase())) {
+                const brand = extractBrand(item.name);
+                if(code.toLowerCase().includes(filterText.toLowerCase()) || item.name.toLowerCase().includes(filterText.toLowerCase()) || brand.toLowerCase().includes(filterText.toLowerCase())) {
                     const totalVal = (item.rt_val || 0) + (item.vsp_val || 0) + (item.ws_val || 0);
+                    
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td><strong style="color:var(--text-main); font-size: 1.1rem; letter-spacing: 0.5px;">${code}</strong></td>
-                        <td class="desc-cell"><div>${item.name}</div>${item.size !== 'UNSPECIFIED' ? `<div class="size-badge">${item.size}</div>`:''}</td>
-                        <td class="data-cell"><div class="qty-text">${formatQty(item.rt_c, item.rt_p)}</div><div class="val-text">${formatCurrency(item.rt_val)}</div></td>
-                        <td class="data-cell"><div class="qty-text">${formatQty(item.vsp_c, item.vsp_p)}</div><div class="val-text">${formatCurrency(item.vsp_val)}</div></td>
-                        <td class="data-cell"><div class="qty-text">${formatQty(item.ws_c, item.ws_p)}</div><div class="val-text">${formatCurrency(item.ws_val)}</div></td>
-                        <td class="total-col data-cell"><div class="total-val">${formatCurrency(totalVal)}</div></td>
+                        <td><strong style="color:var(--text-main); font-size: 1.15rem; letter-spacing: 1px;">${code}</strong></td>
+                        <td class="desc-cell">
+                            <span class="brand-badge">${brand}</span><br>
+                            <div style="margin-top:0.4rem;">${item.name}</div>
+                            ${item.size !== 'UNSPECIFIED' ? `<div class="size-badge">${item.size}</div>`:''}
+                        </td>
+                        <td class="data-cell"><div class="qty-text">${formatQty(item.rt_c, item.rt_p)}</div><div class="val-box">${formatCurrency(item.rt_val)}</div></td>
+                        <td class="data-cell"><div class="qty-text">${formatQty(item.vsp_c, item.vsp_p)}</div><div class="val-box">${formatCurrency(item.vsp_val)}</div></td>
+                        <td class="data-cell"><div class="qty-text">${formatQty(item.ws_c, item.ws_p)}</div><div class="val-box">${formatCurrency(item.ws_val)}</div></td>
+                        <td class="total-col data-cell"><div class="val-box master-val">${formatCurrency(totalVal)}</div></td>
                     `;
                     tbody.appendChild(tr);
                 }
@@ -548,159 +599,106 @@
 
         function executeSearch() { renderTable(document.getElementById('masterSearch').value); }
 
-        // --- EXECUTIVE BOARDROOM LOGIC ---
+        // --- EXECUTIVE METRICS ---
         function buildExecutiveBoardroom() {
-            let grandTotal = 0, liquidVal = 0, lockedVal = 0, skuCount = 0;
-            
+            let gTotal = 0, rtVal = 0, vspVal = 0, wsVal = 0;
+            Object.values(masterDB).forEach(i => {
+                rtVal += (i.rt_val || 0); vspVal += (i.vsp_val || 0); wsVal += (i.ws_val || 0);
+                gTotal += ((i.rt_val || 0) + (i.vsp_val || 0) + (i.ws_val || 0));
+            });
+
+            document.getElementById('execGrandTotal').innerText = formatCurrency(gTotal);
+            document.getElementById('execRtVal').innerText = formatCurrency(rtVal);
+            document.getElementById('execRtWords').innerText = formatToMillionsWords(rtVal);
+            document.getElementById('execVspVal').innerText = formatCurrency(vspVal);
+            document.getElementById('execVspWords').innerText = formatToMillionsWords(vspVal);
+            document.getElementById('execWsVal').innerText = formatCurrency(wsVal);
+            document.getElementById('execWsWords').innerText = formatToMillionsWords(wsVal);
+        }
+
+        // --- SMART AI CHARTS (BRANDS & TOP 7) ---
+        function renderAnalytics() {
+            if(chartInstances.topSkus) chartInstances.topSkus.destroy();
+            if(chartInstances.brands) chartInstances.brands.destroy();
+
+            let skuArr = [], brandMap = {};
             Object.values(masterDB).forEach(item => {
-                let rVal = item.rt_val || 0;
-                let vVal = item.vsp_val || 0;
-                let wVal = item.ws_val || 0;
-                
-                let tot = rVal + vVal + wVal;
-                if (tot > 0) {
-                    skuCount++;
-                    grandTotal += tot;
-                    liquidVal += (rVal + vVal);
-                    lockedVal += wVal;
+                let total = (item.rt_val || 0) + (item.vsp_val || 0) + (item.ws_val || 0);
+                if(total > 0) {
+                    // Extract Top 7 Details
+                    skuArr.push({ label: `${item.sku_code} - ${item.name.substring(0,18)}...`, val: total });
+                    // Map Brand Capital
+                    let b = extractBrand(item.name);
+                    brandMap[b] = (brandMap[b] || 0) + total;
                 }
             });
 
-            document.getElementById('execGrandTotal').innerText = formatCurrency(grandTotal);
-            document.getElementById('execGrandWords').innerText = formatToMillionsWords(grandTotal) + " (PKR)";
-            
-            document.getElementById('execLiquidVal').innerText = formatCurrency(liquidVal);
-            document.getElementById('execLiquidWords').innerText = formatToMillionsWords(liquidVal) + " (PKR)";
+            Chart.defaults.color = '#FBCFE8';
+            Chart.defaults.font.family = "'Segoe UI', sans-serif";
 
-            document.getElementById('execLockedVal').innerText = formatCurrency(lockedVal);
-            document.getElementById('execLockedWords').innerText = formatToMillionsWords(lockedVal) + " (PKR)";
-            
-            document.getElementById('execSkuCount').innerText = skuCount.toLocaleString();
-        }
-
-        // --- ANALYTICS ENGINE (Updated Colors) ---
-        function renderAnalytics() {
-            if(chartInstances.channel) chartInstances.channel.destroy();
-            if(chartInstances.topSkus) chartInstances.topSkus.destroy();
-            if(chartInstances.sizeDist) chartInstances.sizeDist.destroy();
-
-            let tRt = 0, tVsp = 0, tWs = 0, skuArr = [], sizeMap = {};
-            Object.values(masterDB).forEach(item => {
-                let total = (item.rt_val || 0) + (item.vsp_val || 0) + (item.ws_val || 0);
-                tRt += item.rt_val; tVsp += item.vsp_val; tWs += item.ws_val;
-                if(total > 0) skuArr.push({ code: item.sku_code, val: total });
-                if(total > 0 && item.size !== 'UNSPECIFIED') { sizeMap[item.size] = (sizeMap[item.size] || 0) + total; }
-            });
-
-            Chart.defaults.color = '#94A3B8';
-            Chart.defaults.font.family = "'Inter', sans-serif";
-            
-            chartInstances.channel = new Chart(document.getElementById('chartChannel'), {
-                type: 'doughnut',
-                data: { labels: ['RT', 'VSP', 'WS'], datasets: [{ data: [tRt, tVsp, tWs], backgroundColor: ['#0EA5E9', '#38BDF8', '#0284C7'], borderColor: '#0E1629', borderWidth: 3 }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
+            // TOP 7 SKUS
             skuArr.sort((a, b) => b.val - a.val); let top7 = skuArr.slice(0, 7);
-            let themeGradient = document.getElementById('chartTopSkus').getContext('2d').createLinearGradient(0,0,0,400);
-            themeGradient.addColorStop(0, '#38BDF8'); themeGradient.addColorStop(1, '#0284C7');
+            let ctxTop = document.getElementById('chartTopSkus').getContext('2d');
+            let gradTop = ctxTop.createLinearGradient(0,0,0,400);
+            gradTop.addColorStop(0, '#F472B6'); gradTop.addColorStop(1, '#BE185D');
 
-            chartInstances.topSkus = new Chart(document.getElementById('chartTopSkus'), {
+            chartInstances.topSkus = new Chart(ctxTop, {
                 type: 'bar',
-                data: { labels: top7.map(s => s.code), datasets: [{ label: 'Valuation', data: top7.map(s => s.val), backgroundColor: themeGradient, borderRadius: 6 }] },
+                data: { labels: top7.map(s => s.label), datasets: [{ label: 'Valuation (PKR)', data: top7.map(s => s.val), backgroundColor: gradTop, borderRadius: 6 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
 
-            let sLabels = Object.keys(sizeMap).sort((a,b) => sizeMap[b] - sizeMap[a]).slice(0, 10);
-            chartInstances.sizeDist = new Chart(document.getElementById('chartSizeDist'), {
+            // BRAND CAPITAL
+            let bLabels = Object.keys(brandMap).sort((a,b) => brandMap[b] - brandMap[a]).slice(0, 10);
+            let ctxBrand = document.getElementById('chartBrands').getContext('2d');
+            let gradBrand = ctxBrand.createLinearGradient(0,0,0,400);
+            gradBrand.addColorStop(0, '#D4AF37'); gradBrand.addColorStop(1, '#8A6E1E');
+
+            chartInstances.brands = new Chart(ctxBrand, {
                 type: 'bar',
-                data: { labels: sLabels, datasets: [{ label: 'Capital by Size (Rs)', data: sLabels.map(l => sizeMap[l]), backgroundColor: 'rgba(14, 165, 233, 0.4)', borderColor: '#38BDF8', borderWidth: 1, borderRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false }
+                data: { labels: bLabels, datasets: [{ label: 'Brand Value (PKR)', data: bLabels.map(l => brandMap[l]), backgroundColor: gradBrand, borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
 
-        // --- ENTERPRISE EXPORTS (PDF & CSV) ---
-        function exportEnterprisePDF() {
+        // --- ENTERPRISE EXCEL EXPORT (SHEETJS) ---
+        function exportEnterpriseExcel() {
             if(Object.keys(masterDB).length === 0) return showAlert('No data to export.', 'bad');
-            showAlert('Generating Formatted PDF...', 'good');
+            showAlert('Generating Executive Excel Report...', 'good');
             
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('landscape'); 
-            
-            // Modern PDF Header
-            doc.setFillColor(15, 23, 42); // Slate 900
-            doc.rect(0, 0, 300, 25, 'F');
-            doc.setTextColor(56, 189, 248); // Cyan
-            doc.setFontSize(18);
-            doc.text("NUR ENTERPRISES", 14, 12);
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(10);
-            doc.text("Master Valuation Report | Generated: " + new Date().toLocaleString(), 14, 18);
+            // Build the specific Array of Arrays for SheetJS
+            let aoa = [
+                ["NUR ENTERPRISES - GLOBAL MASTER VALUATION OS"],
+                ["AREA SALES MANAGER: MISS RIDA NAWAZ"],
+                ["Report Generated:", new Date().toLocaleString()],
+                [],
+                ["SKU Code", "AI Brand", "Product Description", "AI Size", "RT Qty (In Hand)", "Retail Value (PKR)", "VSP Qty (In Hand)", "VSP Value (PKR)", "WS Qty (In Hand)", "Wholesale Value (PKR)", "Total Valuation (PKR)"]
+            ];
 
-            const tableColumn = ["SKU Code", "Product Description", "Size", "RT Value (PKR)", "VSP Value (PKR)", "WS Value (PKR)", "Total Valuation (PKR)"];
-            const tableRows = [];
-
-            Object.values(masterDB).forEach(item => {
-                const tot = (item.rt_val||0) + (item.vsp_val||0) + (item.ws_val||0);
-                if (tot > 0) {
-                    tableRows.push([
-                        item.sku_code,
-                        item.name,
-                        item.size || "-",
-                        item.rt_val.toLocaleString(),
-                        item.vsp_val.toLocaleString(),
-                        item.ws_val.toLocaleString(),
-                        tot.toLocaleString()
+            Object.values(masterDB).forEach(i => { 
+                const tot = (i.rt_val||0) + (i.vsp_val||0) + (i.ws_val||0);
+                if(tot > 0) {
+                    aoa.push([
+                        i.sku_code,
+                        extractBrand(i.name),
+                        i.name,
+                        i.size || "-",
+                        formatQty(i.rt_c, i.rt_p), i.rt_val,
+                        formatQty(i.vsp_c, i.vsp_p), i.vsp_val,
+                        formatQty(i.ws_c, i.ws_p), i.ws_val,
+                        tot
                     ]);
                 }
             });
 
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: 30,
-                theme: 'grid',
-                styles: { fontSize: 8, cellPadding: 3, textColor: [50, 50, 50] },
-                headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold' },
-                alternateRowStyles: { fillColor: [245, 248, 250] }
-            });
-
-            doc.save(`NUR_Master_Valuation_${new Date().toISOString().split('T')[0]}.pdf`);
-        }
-
-        function exportEnterpriseCSV() {
-            if(Object.keys(masterDB).length === 0) return showAlert('Database empty.', 'bad');
-            let csv = "SKU Code,Description,Size,RT Qty,RT Value,VSP Qty,VSP Value,WS Qty,WS Value,Total Value\\n";
-            Object.values(masterDB).forEach(i => { 
-                const tot = (i.rt_val||0) + (i.vsp_val||0) + (i.ws_val||0);
-                csv += `${i.sku_code},"${i.name}",${i.size},'${formatQty(i.rt_c, i.rt_p)}',${i.rt_val},'${formatQty(i.vsp_c, i.vsp_p)}',${i.vsp_val},'${formatQty(i.ws_c, i.ws_p)}',${i.ws_val},${tot}\\n`; 
-            });
-            const link = document.createElement("a"); link.href = "data:text/csv;charset=utf-8," + encodeURI(csv);
-            link.download = `NUR_RAW_DATA_${new Date().toISOString().split('T')[0]}.csv`; link.click();
-        }
-
-        // --- HISTORY VAULT ---
-        function refreshArchiveDropdown() {
-            const select = document.getElementById('archiveDateSelect');
-            select.innerHTML = '<option value="">-- Select Archive Date --</option>';
-            historicalArchives.forEach(d => { select.innerHTML += `<option value="${d}">${d}</option>`; });
-        }
-
-        async function loadArchiveData() {
-            const d = document.getElementById('archiveDateSelect').value;
-            const tbody = document.getElementById('archiveBody');
-            if(!d) return;
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
             
-            showAlert('Retrieving vault record...', 'sync');
-            const { data } = await db.from('historical_archives').select('*').eq('archive_date', d);
-            activeArchiveView = { date: d, data: data };
-            tbody.innerHTML = '';
-            
-            data.forEach(item => {
-                const totalVal = (item.rt_val || 0) + (item.vsp_val || 0) + (item.ws_val || 0);
-                tbody.innerHTML += `<tr><td><strong style="color:var(--text-main); font-size: 1.1rem;">${item.sku_code}</strong></td><td class="desc-cell">${item.name}</td><td class="data-cell"><div class="val-text">${formatCurrency(item.rt_val)}</div></td><td class="data-cell"><div class="val-text">${formatCurrency(item.vsp_val)}</div></td><td class="data-cell"><div class="val-text">${formatCurrency(item.ws_val)}</div></td><td class="total-col data-cell"><div class="total-val">${formatCurrency(totalVal)}</div></td></tr>`;
-            });
-            showAlert('Vault Record Opened', 'good');
+            // Simple column sizing
+            ws['!cols'] = [ {wpx: 12}, {wpx: 15}, {wpx: 40}, {wpx: 10}, {wpx: 15}, {wpx: 15}, {wpx: 15}, {wpx: 15}, {wpx: 15}, {wpx: 15}, {wpx: 20} ];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Master Ledger");
+            XLSX.writeFile(wb, `NUR_Executive_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
     </script>
 </body>
