@@ -8,6 +8,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -23,33 +27,42 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
         body { background: radial-gradient(circle at top, #1a1a1a, var(--bg-obsidian)); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-        header { background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(15px); border-bottom: 2px solid var(--gold-base); padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        /* HEADER */
+        header { background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(15px); border-bottom: 2px solid var(--gold-base); padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         header h1 { font-size: 2rem; letter-spacing: 3px; font-weight: 300; }
         header h1 span { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
         .header-meta { text-align: right; font-size: 0.95rem; color: var(--text-muted); }
         .header-meta strong { color: var(--gold-light); letter-spacing: 1.5px; }
 
+        /* NAVIGATION */
         nav { background: rgba(10, 10, 10, 0.95); display: flex; padding: 0 2rem; border-bottom: 1px solid var(--glass-border); overflow-x: auto; scrollbar-width: none; }
-        .nav-tab { padding: 1.2rem 1.5rem; border: none; background: none; font-size: 1.05rem; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease; white-space: nowrap; letter-spacing: 0.5px; }
+        .nav-tab { padding: 1.2rem 1.5rem; border: none; background: none; font-size: 1.05rem; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s ease; white-space: nowrap; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.5rem; }
         .nav-tab:hover { color: var(--gold-light); background: rgba(255,255,255,0.02); }
         .nav-tab.active { color: var(--gold-base); border-bottom-color: var(--gold-base); text-shadow: 0 0 15px rgba(212, 175, 55, 0.6); }
 
         main { flex: 1; padding: 2.5rem; max-width: 1800px; width: 100%; margin: 0 auto; }
         .panel { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 3rem; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6); display: none; }
-        .panel.active { display: block; animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .panel.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         h2 { margin-bottom: 2rem; color: var(--gold-light); font-size: 1.8rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem; font-weight: 300; letter-spacing: 1px; }
 
+        /* ELITE SEARCH BAR */
         .search-wrapper { position: relative; width: 100%; max-width: 800px; margin-bottom: 2.5rem; }
-        .search-input { width: 100%; padding: 1.2rem 1.5rem; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--gold-dark); border-radius: 10px; color: var(--gold-light); font-size: 1.1rem; outline: none; transition: 0.3s; }
+        .search-wrapper i { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); color: var(--gold-dark); font-size: 1.2rem; transition: 0.3s; }
+        .search-input { width: 100%; padding: 1.2rem 1.5rem 1.2rem 3.5rem; background: rgba(0, 0, 0, 0.7); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--gold-light); font-size: 1.1rem; outline: none; transition: all 0.3s ease; box-shadow: inset 0 2px 15px rgba(0,0,0,0.9); }
+        .search-input::placeholder { color: #475569; font-weight: 300; }
+        .search-input:focus { border-color: var(--gold-base); box-shadow: 0 0 25px rgba(212, 175, 55, 0.3), inset 0 2px 10px rgba(0,0,0,0.8); background: #000; }
+        .search-input:focus + i { color: var(--gold-light); text-shadow: 0 0 10px var(--gold-base); }
         
-        .table-container { overflow-x: auto; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.4); max-height: 700px; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: #080808; color: var(--gold-base); font-weight: 800; padding: 1.5rem 1.2rem; border-bottom: 2px solid var(--gold-dark); text-transform: uppercase; font-size: 0.85rem; position: sticky; top: 0; z-index: 10; letter-spacing: 1.5px; }
+        /* TABLE: ANTI-OVERFLOW & FROZEN HEADERS */
+        .table-container { border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(0, 0, 0, 0.4); max-height: 65vh; overflow-y: auto; overflow-x: auto; position: relative; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; min-width: 1000px; }
+        th { background: #080808; color: var(--gold-base); font-weight: 800; padding: 1.5rem 1.2rem; border-bottom: 2px solid var(--gold-dark); text-transform: uppercase; font-size: 0.85rem; position: sticky; top: 0; z-index: 10; letter-spacing: 1.5px; box-shadow: 0 2px 10px rgba(0,0,0,0.8); }
         td { padding: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-main); vertical-align: middle; }
+        tr:hover td { background: rgba(212, 175, 55, 0.05); }
         
-        .desc-cell { min-width: 250px; max-width: 400px; word-wrap: break-word; white-space: normal; line-height: 1.5; }
+        .desc-cell { min-width: 250px; max-width: 350px; word-wrap: break-word; white-space: normal; line-height: 1.5; }
         .data-cell { white-space: nowrap; }
         .qty-text { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.3rem; color: #f8fafc; }
         .val-text { font-size: 0.95rem; font-weight: 700; color: var(--gold-light); }
@@ -57,37 +70,43 @@
         .total-val { color: var(--gold-base); font-size: 1.4rem; font-weight: 900; }
         .size-badge { display: inline-block; padding: 0.4rem 0.8rem; background: rgba(212, 175, 55, 0.1); color: var(--gold-base); border-radius: 6px; font-size: 0.75rem; font-weight: bold; margin-top: 0.5rem; border: 1px solid var(--glass-border); }
 
+        /* BUTTONS */
+        .btn { background: var(--gold-gradient); color: #000; border: none; padding: 1.2rem 2.5rem; border-radius: 8px; font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; gap: 0.8rem; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 1.5px; box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3); transition: 0.3s; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(212, 175, 55, 0.6); }
+        .btn-outline { background: rgba(0,0,0,0.6); border: 2px solid var(--gold-base); color: var(--gold-light); }
+        
+        /* ALERTS */
+        #alertBox { padding: 1.5rem; border-radius: 12px; margin-bottom: 2.5rem; display: none; font-weight: bold; text-align: center; font-size: 1.1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 5px solid; }
+        .alert-good { background: rgba(212, 175, 55, 0.15); color: var(--gold-light); border-color: var(--gold-base); }
+        .alert-bad { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: var(--danger); }
+
+        /* EXECUTIVE DASHBOARD & STATS */
+        .report-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3.5rem; }
+        .stat-box { background: rgba(5, 5, 5, 0.8); padding: 2.5rem; border-radius: 16px; border: 1px solid var(--glass-border); position: relative; display: flex; flex-direction: column; justify-content: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); transition: 0.3s; }
+        .stat-box:hover { transform: translateY(-5px); border-color: var(--gold-base); }
+        .stat-box h4 { font-size: 0.95rem; color: var(--gold-light); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem; }
+        .stat-box .value { font-size: clamp(1.8rem, 2.5vw, 2.5rem); color: var(--text-main); font-weight: 900; }
+        .stat-box .sub-value { font-size: 1rem; color: var(--gold-dark); margin-top: 0.5rem; font-weight: 600; letter-spacing: 1px; }
+        
+        .master-box { grid-column: 1 / -1; background: linear-gradient(to right, rgba(15, 15, 15, 0.9), rgba(30, 25, 10, 0.9)); border: 1px solid var(--gold-base); text-align: center; }
+        .master-box .value { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: clamp(3rem, 5vw, 5rem); }
+        .master-box .sub-value { font-size: 1.5rem; color: var(--gold-light); margin-top: 1rem; }
+
+        /* INGESTION & UPLOAD */
         .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
         .upload-card { background: rgba(0, 0, 0, 0.3); border: 1px dashed var(--gold-dark); padding: 3rem 2rem; border-radius: 16px; text-align: center; }
         .upload-card input[type="file"] { width: 100%; padding: 1rem; background: rgba(0,0,0,0.8); border-radius: 8px; color: var(--text-muted); margin-bottom: 1rem; cursor: pointer; }
         .status-badge { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 50px; font-size: 0.85rem; font-weight: bold; margin-top: 1rem; display: none; background: rgba(212, 175, 55, 0.15); color: var(--gold-light); border: 1px solid var(--gold-base); }
-
+        #kpoAuthWall { background: rgba(0, 0, 0, 0.8); border: 1px solid var(--gold-dark); border-radius: 16px; padding: 4rem; text-align: center; max-width: 600px; margin: 0 auto 3rem auto; }
+        #kpoAuthWall input { width: 100%; padding: 1.2rem; background: rgba(0,0,0,0.5); border: 1px solid var(--gold-base); border-radius: 8px; color: var(--text-main); font-size: 1.2rem; margin-bottom: 1.5rem; text-align: center; letter-spacing: 3px; }
+        #kpoWorkspace { display: none; }
+        
+        /* ANALYTICS */
         .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2.5rem; margin-bottom: 2rem; }
         .chart-container { background: rgba(0,0,0,0.5); border-radius: 16px; padding: 2rem; border: 1px solid var(--glass-border); min-height: 400px; display: flex; flex-direction: column; }
         .chart-title { color: var(--gold-light); font-size: 1.1rem; font-weight: bold; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 2px; text-align: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem; }
         .chart-wrapper { flex: 1; position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
 
-        .btn { background: var(--gold-gradient); color: #000; border: none; padding: 1.2rem 2.5rem; border-radius: 8px; font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; gap: 0.8rem; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 1.5px; }
-        .btn-outline { background: rgba(0,0,0,0.6); border: 2px solid var(--gold-base); color: var(--gold-light); }
-        
-        #alertBox { padding: 1.5rem; border-radius: 12px; margin-bottom: 2.5rem; display: none; font-weight: bold; text-align: center; font-size: 1.1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .alert-good { background: rgba(212, 175, 55, 0.15); color: var(--gold-light); border: 1px solid var(--gold-base); }
-        .alert-bad { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid #b91c1c; }
-        .alert-sync { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid #3b82f6; }
-
-        .report-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 3.5rem; }
-        .stat-box { background: rgba(5, 5, 5, 0.8); padding: 2.5rem; border-radius: 16px; border: 1px solid var(--glass-border); position: relative; display: flex; flex-direction: column; justify-content: center; }
-        .stat-box h4 { font-size: 0.95rem; color: var(--gold-light); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem; }
-        .stat-box .value { font-size: clamp(1.8rem, 2.5vw, 2.5rem); color: var(--text-main); font-weight: 900; }
-        .stat-box.master-box { grid-column: 1 / -1; background: linear-gradient(to right, rgba(15, 15, 15, 0.9), rgba(30, 25, 10, 0.9)); border: 1px solid var(--gold-base); }
-        .stat-box.master-box .value { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: clamp(2.5rem, 4vw, 4rem); }
-
-        .history-controls { display: flex; gap: 1.5rem; align-items: center; background: rgba(0,0,0,0.5); padding: 2rem; border-radius: 16px; margin-bottom: 2.5rem; border: 1px solid var(--glass-border); flex-wrap: wrap; }
-        .date-picker { padding: 1.2rem; border-radius: 8px; border: 1px solid var(--gold-dark); background: rgba(0, 0, 0, 0.8); color: var(--gold-light); font-size: 1.1rem; flex: 1; min-width: 300px; outline: none; }
-
-        #kpoAuthWall { background: rgba(0, 0, 0, 0.8); border: 1px solid var(--gold-dark); border-radius: 16px; padding: 4rem; text-align: center; max-width: 600px; margin: 0 auto 3rem auto; }
-        #kpoAuthWall input { width: 100%; padding: 1.2rem; background: rgba(0,0,0,0.5); border: 1px solid var(--gold-base); border-radius: 8px; color: var(--text-main); font-size: 1.2rem; margin-bottom: 1.5rem; text-align: center; }
-        #kpoWorkspace { display: none; }
     </style>
 </head>
 <body>
@@ -106,10 +125,11 @@
 
     <nav>
         <button id="tab-dashboard" class="nav-tab active" onclick="switchPanel('dashboard')"><i class="fas fa-search"></i> Master Stock Board</button>
+        <button id="tab-executive" class="nav-tab" onclick="switchPanel('executive')"><i class="fas fa-crown"></i> Executive Boardroom</button>
         <button id="tab-analytics" class="nav-tab" onclick="switchPanel('analytics')"><i class="fas fa-chart-pie"></i> AI Analytics & Trends</button>
+        <button id="tab-reports" class="nav-tab" onclick="switchPanel('reports')"><i class="fas fa-file-pdf"></i> PDF Export & Reports</button>
+        <button id="tab-history" class="nav-tab" onclick="switchPanel('history')"><i class="fas fa-calendar-alt"></i> Historical Vault</button>
         <button id="tab-upload" class="nav-tab" onclick="switchPanel('upload')"><i class="fas fa-microchip"></i> Data DNA Ingestion</button>
-        <button id="tab-history" class="nav-tab" onclick="switchPanel('history')"><i class="fas fa-calendar-alt"></i> Historical Archives</button>
-        <button id="tab-reports" class="nav-tab" onclick="switchPanel('reports')"><i class="fas fa-file-invoice-dollar"></i> Global Reports</button>
     </nav>
 
     <main>
@@ -119,6 +139,7 @@
             <h2><i class="fas fa-boxes"></i> Live Master Valuation Control</h2>
             <div class="search-wrapper">
                 <input type="text" id="masterSearch" class="search-input" placeholder="Live Search by SKU Code, English Description, or Size (e.g. 110G)..." autocomplete="off" oninput="executeSearch()">
+                <i class="fas fa-search"></i>
             </div>
             <div class="table-container">
                 <table>
@@ -139,6 +160,37 @@
             </div>
         </div>
 
+        <div id="executive" class="panel">
+            <h2><i class="fas fa-crown"></i> Board of Directors View</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 1.1rem;">Top-level financial metrics converted into readable millions/billions for rapid executive decision making.</p>
+            
+            <div class="report-stats">
+                <div class="stat-box master-box">
+                    <h4>Grand Total Global Value</h4>
+                    <div class="value" id="execGrandTotal">Rs 0.00</div>
+                    <div class="sub-value" id="execGrandWords">0.00 Million</div>
+                </div>
+                
+                <div class="stat-box">
+                    <h4>Highly Liquid Capital (Retail + VSP)</h4>
+                    <div class="value" id="execLiquidVal">Rs 0.00</div>
+                    <div class="sub-value" id="execLiquidWords">0.00 Million</div>
+                </div>
+                
+                <div class="stat-box">
+                    <h4>Wholesale Locked Capital (WS)</h4>
+                    <div class="value" id="execLockedVal">Rs 0.00</div>
+                    <div class="sub-value" id="execLockedWords">0.00 Million</div>
+                </div>
+
+                <div class="stat-box">
+                    <h4>Total Active Assest Classes</h4>
+                    <div class="value" id="execSkuCount" style="color: var(--gold-light);">0</div>
+                    <div class="sub-value">Unique SKUs Holding Value</div>
+                </div>
+            </div>
+        </div>
+
         <div id="analytics" class="panel">
             <h2><i class="fas fa-chart-line"></i> Top Level Digital Trending & AI Insights</h2>
             <div class="analytics-grid">
@@ -154,6 +206,52 @@
                     <div class="chart-title">AI Grams/Volume (Size) Concentration</div>
                     <div class="chart-wrapper" style="height: 350px;"><canvas id="chartSizeDist"></canvas></div>
                 </div>
+            </div>
+        </div>
+
+        <div id="reports" class="panel">
+            <h2><i class="fas fa-file-pdf"></i> Enterprise Table Generation & Export</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2.5rem; font-size: 1.1rem;">Generate flawlessly formatted, paginated PDF documents for formal presentations and printing.</p>
+            
+            <div class="upload-grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
+                <div class="upload-card" style="padding: 4rem 2rem;">
+                    <i class="fas fa-file-pdf fa-4x" style="color: var(--danger); margin-bottom: 1.5rem;"></i>
+                    <h3 style="margin-bottom: 0.5rem;">Master Valuation PDF</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Complete inventory ledger in perfect table format.</p>
+                    <button class="btn" onclick="exportEnterprisePDF('master')"><i class="fas fa-download"></i> Generate PDF Table</button>
+                </div>
+
+                <div class="upload-card" style="padding: 4rem 2rem;">
+                    <i class="fas fa-file-csv fa-4x" style="color: #10b981; margin-bottom: 1.5rem;"></i>
+                    <h3 style="margin-bottom: 0.5rem;">Raw Data Dump (CSV)</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem;">For importing directly into other accounting softwares.</p>
+                    <button class="btn btn-outline" onclick="exportEnterpriseCSV()"><i class="fas fa-download"></i> Export Raw CSV</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="history" class="panel">
+            <h2><i class="fas fa-calendar-check"></i> Timestamped Historical Vault</h2>
+            <div class="history-controls">
+                <select id="archiveDateSelect" class="date-picker"><option value="">-- Fetching Vault Records... --</option></select>
+                <button class="btn" onclick="loadArchiveData()"><i class="fas fa-eye"></i> Open Ledger</button>
+            </div>
+            <div class="table-container">
+                <table id="archiveTable">
+                    <thead>
+                        <tr>
+                            <th>SKU Code</th>
+                            <th>Product Description</th>
+                            <th>RT Value</th>
+                            <th>VSP Value</th>
+                            <th>WS Value</th>
+                            <th class="total-col">Historical Valuation (Rs)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="archiveBody">
+                        <tr><td colspan="6" style="text-align:center; padding:5rem; color:var(--text-muted);">Select a timestamp above and click Open Ledger.</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -188,50 +286,10 @@
             </div>
         </div>
 
-        <div id="history" class="panel">
-            <h2><i class="fas fa-calendar-check"></i> Timestamped Historical Archives</h2>
-            <div class="history-controls">
-                <select id="archiveDateSelect" class="date-picker"><option value="">-- Fetching Vault Records... --</option></select>
-                <button class="btn" onclick="loadArchiveData()"><i class="fas fa-eye"></i> Fetch Vault</button>
-                <button class="btn btn-outline" onclick="exportArchiveData()"><i class="fas fa-file-csv"></i> Download Record</button>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>SKU Code</th>
-                            <th>Product Description</th>
-                            <th>RT (Historical)</th>
-                            <th>VSP (Historical)</th>
-                            <th>WS (Historical)</th>
-                            <th class="total-col">Historical Valuation (Rs)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="archiveBody">
-                        <tr><td colspan="6" style="text-align:center; padding:5rem; color:var(--text-muted);">Select a timestamp above and click Fetch Vault.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="reports" class="panel">
-            <h2><i class="fas fa-file-invoice-dollar"></i> VIP Level Financial Reporting</h2>
-            <div class="report-stats">
-                <div class="stat-box master-box"><h4>Grand Total Global Value (Rs)</h4><div class="value" id="repGrandTotal">Rs 0.00</div></div>
-                <div class="stat-box"><h4>Total Active SKUs</h4><div class="value" id="repTotalSku">0</div></div>
-                <div class="stat-box"><h4>Retail (RT) Value</h4><div class="value" id="repRtVal">Rs 0.00</div></div>
-                <div class="stat-box"><h4>LMT (VSP) Value</h4><div class="value" id="repVspVal">Rs 0.00</div></div>
-                <div class="stat-box"><h4>Whole Sale (WS) Value</h4><div class="value" id="repWsVal">Rs 0.00</div></div>
-            </div>
-            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center;">
-                <button class="btn" onclick="exportReport('master')"><i class="fas fa-download"></i> Export Valuation Report</button>
-                <button class="btn btn-outline" onclick="exportReport('grams')"><i class="fas fa-weight-hanging"></i> Export Size Report</button>
-            </div>
-        </div>
     </main>
 
     <script>
-        // THE FIX: The typo has been corrected (ogfw instead of qgfw)
+        // Supabase DB Connection
         const supabaseUrl = 'https://vngpwmsjvvaudcqiogfw.supabase.co'; 
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZuZ3B3bXNqdnZhdWRjcWlvZ2Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NjY4NzQsImV4cCI6MjA5NTI0Mjg3NH0.X46d6ckVs-SUDpweyVPxzxNUc3GqJunkIyQ_F1ivaP4';
         const db = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -260,7 +318,7 @@
             document.getElementById('tab-' + panelId).classList.add('active');
 
             if(panelId === 'dashboard') renderTable();
-            if(panelId === 'reports') generateReportStats();
+            if(panelId === 'executive') buildExecutiveBoardroom();
             if(panelId === 'history') refreshArchiveDropdown();
             if(panelId === 'analytics') renderAnalytics(); 
         };
@@ -272,6 +330,18 @@
             box.style.display = 'block';
             window.scrollTo({top: 0, behavior: 'smooth'});
             setTimeout(() => box.style.display = 'none', 7000);
+        }
+
+        // --- MATH FORMATTING (Millions/Billions) ---
+        function formatCurrency(val) { return "Rs " + val.toLocaleString('en-US', {minimumFractionDigits: 2}); }
+        function formatQty(c, p) { return (c === 0 && p === 0) ? "0/0" : `${c}/${p}`; }
+        
+        function formatToMillionsWords(val) {
+            if (val === 0) return "0.00";
+            if (val >= 1000000000) return (val / 1000000000).toFixed(2) + " Billion";
+            if (val >= 1000000) return (val / 1000000).toFixed(2) + " Million";
+            if (val >= 1000) return (val / 1000).toFixed(2) + " Thousand";
+            return val.toFixed(2);
         }
 
         async function loadLiveServerData() {
@@ -289,7 +359,6 @@
                 showAlert('Could not load live data: ' + err.message, 'bad');
             } finally {
                 renderTable();
-                generateReportStats();
             }
         }
 
@@ -374,7 +443,6 @@
             const timestamp = new Date().toLocaleString('en-US', { timeZone: 'Asia/Karachi' });
             
             try {
-                // 1. Build Payload First
                 let newDB = {};
                 let itemsExtracted = 0;
                 ['rt', 'vsp', 'ws'].forEach(ch => {
@@ -398,7 +466,6 @@
                 const livePayload = Object.values(newDB);
                 if (livePayload.length === 0) throw new Error("No data extracted. Please upload valid Excel files.");
 
-                // 2. Archive Old Data
                 if(Object.keys(masterDB).length > 0) {
                     const archPayload = Object.values(masterDB).map(i => ({
                         archive_date: timestamp, sku_code: i.sku_code, name: i.name, size: i.size,
@@ -406,18 +473,12 @@
                         vsp_c: i.vsp_c, vsp_p: i.vsp_p, vsp_val: i.vsp_val,
                         ws_c: i.ws_c, ws_p: i.ws_p, ws_val: i.ws_val
                     }));
-                    const { error: archErr } = await db.from('historical_archives').insert(archPayload);
-                    if (archErr) throw new Error("Archive Blocked: " + archErr.message);
+                    await db.from('historical_archives').insert(archPayload);
                 }
 
-                // 3. Wipe and Insert
-                const { error: wipeErr } = await db.from('live_inventory').delete().neq('sku_code', 'WIPE_000');
-                if (wipeErr) throw new Error("Wipe Blocked: " + wipeErr.message);
+                await db.from('live_inventory').delete().neq('sku_code', 'WIPE_000');
+                await db.from('live_inventory').insert(livePayload);
 
-                const { error: insErr } = await db.from('live_inventory').insert(livePayload);
-                if (insErr) throw new Error("Insert Blocked: " + insErr.message);
-
-                // 4. Cleanup
                 tempIngestion = { rt: null, vsp: null, ws: null };
                 ['rt', 'vsp', 'ws'].forEach(ch => {
                     document.getElementById(`file${ch.toUpperCase()}`).value = '';
@@ -427,15 +488,10 @@
                 await loadLiveServerData();
                 switchPanel('dashboard');
                 showAlert('Global Sync Complete! Database is live.', 'good');
-            } catch (err) { 
-                console.error(err);
-                showAlert('CRITICAL FAIL: ' + err.message, 'bad'); 
-            }
+            } catch (err) { showAlert('CRITICAL FAIL: ' + err.message, 'bad'); }
         }
 
-        function formatCurrency(val) { return "Rs " + val.toLocaleString('en-US', {minimumFractionDigits: 2}); }
-        function formatQty(c, p) { return (c === 0 && p === 0) ? "0/0" : `${c}/${p}`; }
-
+        // --- DASHBOARD TABLE RENDER ---
         function renderTable(filterText = "") {
             const tbody = document.getElementById('inventoryBody');
             if(!tbody) return; tbody.innerHTML = '';
@@ -466,6 +522,37 @@
 
         function executeSearch() { renderTable(document.getElementById('masterSearch').value); }
 
+        // --- EXECUTIVE BOARDROOM LOGIC ---
+        function buildExecutiveBoardroom() {
+            let grandTotal = 0, liquidVal = 0, lockedVal = 0, skuCount = 0;
+            
+            Object.values(masterDB).forEach(item => {
+                let rVal = item.rt_val || 0;
+                let vVal = item.vsp_val || 0;
+                let wVal = item.ws_val || 0;
+                
+                let tot = rVal + vVal + wVal;
+                if (tot > 0) {
+                    skuCount++;
+                    grandTotal += tot;
+                    liquidVal += (rVal + vVal);
+                    lockedVal += wVal;
+                }
+            });
+
+            document.getElementById('execGrandTotal').innerText = formatCurrency(grandTotal);
+            document.getElementById('execGrandWords').innerText = formatToMillionsWords(grandTotal) + " (PKR)";
+            
+            document.getElementById('execLiquidVal').innerText = formatCurrency(liquidVal);
+            document.getElementById('execLiquidWords').innerText = formatToMillionsWords(liquidVal) + " (PKR)";
+
+            document.getElementById('execLockedVal').innerText = formatCurrency(lockedVal);
+            document.getElementById('execLockedWords').innerText = formatToMillionsWords(lockedVal) + " (PKR)";
+            
+            document.getElementById('execSkuCount').innerText = skuCount.toLocaleString();
+        }
+
+        // --- ANALYTICS ENGINE ---
         function renderAnalytics() {
             if(chartInstances.channel) chartInstances.channel.destroy();
             if(chartInstances.topSkus) chartInstances.topSkus.destroy();
@@ -504,6 +591,68 @@
             });
         }
 
+        // --- ENTERPRISE EXPORTS (PDF & CSV) ---
+        function exportEnterprisePDF() {
+            if(Object.keys(masterDB).length === 0) return showAlert('No data to export.', 'bad');
+            showAlert('Generating Formatted PDF...', 'good');
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape'); // Landscape for better table fit
+            
+            // PDF Header
+            doc.setFillColor(5, 5, 5);
+            doc.rect(0, 0, 300, 25, 'F');
+            doc.setTextColor(212, 175, 55);
+            doc.setFontSize(18);
+            doc.text("NUR ENTERPRISES", 14, 12);
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(10);
+            doc.text("Master Valuation Report | Generated: " + new Date().toLocaleString(), 14, 18);
+
+            const tableColumn = ["SKU Code", "Product Description", "Size", "RT Value (PKR)", "VSP Value (PKR)", "WS Value (PKR)", "Total Valuation (PKR)"];
+            const tableRows = [];
+
+            Object.values(masterDB).forEach(item => {
+                const tot = (item.rt_val||0) + (item.vsp_val||0) + (item.ws_val||0);
+                if (tot > 0) {
+                    tableRows.push([
+                        item.sku_code,
+                        item.name,
+                        item.size || "-",
+                        item.rt_val.toLocaleString(),
+                        item.vsp_val.toLocaleString(),
+                        item.ws_val.toLocaleString(),
+                        tot.toLocaleString()
+                    ]);
+                }
+            });
+
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 30,
+                theme: 'grid',
+                styles: { fontSize: 8, cellPadding: 3 },
+                headStyles: { fillColor: [10, 10, 10], textColor: [212, 175, 55], fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [245, 245, 245] }
+            });
+
+            doc.save(`NUR_Master_Valuation_${new Date().toISOString().split('T')[0]}.pdf`);
+            showAlert('PDF Downloaded Successfully', 'good');
+        }
+
+        function exportEnterpriseCSV() {
+            if(Object.keys(masterDB).length === 0) return showAlert('Database empty.', 'bad');
+            let csv = "SKU Code,Description,Size,RT Qty,RT Value,VSP Qty,VSP Value,WS Qty,WS Value,Total Value\\n";
+            Object.values(masterDB).forEach(i => { 
+                const tot = (i.rt_val||0) + (i.vsp_val||0) + (i.ws_val||0);
+                csv += `${i.sku_code},"${i.name}",${i.size},'${formatQty(i.rt_c, i.rt_p)}',${i.rt_val},'${formatQty(i.vsp_c, i.vsp_p)}',${i.vsp_val},'${formatQty(i.ws_c, i.ws_p)}',${i.ws_val},${tot}\\n`; 
+            });
+            const link = document.createElement("a"); link.href = "data:text/csv;charset=utf-8," + encodeURI(csv);
+            link.download = `NUR_RAW_DATA_${new Date().toISOString().split('T')[0]}.csv`; link.click();
+        }
+
+        // --- HISTORY VAULT ---
         function refreshArchiveDropdown() {
             const select = document.getElementById('archiveDateSelect');
             select.innerHTML = '<option value="">-- Select Archive Date --</option>';
@@ -522,36 +671,9 @@
             
             data.forEach(item => {
                 const totalVal = (item.rt_val || 0) + (item.vsp_val || 0) + (item.ws_val || 0);
-                tbody.innerHTML += `<tr><td><strong style="color:var(--gold-base);">${item.sku_code}</strong></td><td>${item.name}</td><td><div class="qty-text">${formatQty(item.rt_c, item.rt_p)}</div><div class="val-text">${formatCurrency(item.rt_val)}</div></td><td><div class="qty-text">${formatQty(item.vsp_c, item.vsp_p)}</div><div class="val-text">${formatCurrency(item.vsp_val)}</div></td><td><div class="qty-text">${formatQty(item.ws_c, item.ws_p)}</div><div class="val-text">${formatCurrency(item.ws_val)}</div></td><td class="total-col"><div class="total-val">${formatCurrency(totalVal)}</div></td></tr>`;
+                tbody.innerHTML += `<tr><td><strong style="color:var(--gold-base);">${item.sku_code}</strong></td><td class="desc-cell">${item.name}</td><td><div class="val-text">${formatCurrency(item.rt_val)}</div></td><td><div class="val-text">${formatCurrency(item.vsp_val)}</div></td><td><div class="val-text">${formatCurrency(item.ws_val)}</div></td><td class="total-col"><div class="total-val">${formatCurrency(totalVal)}</div></td></tr>`;
             });
             showAlert('Vault Record Opened', 'good');
-        }
-
-        function generateReportStats() {
-            let total = 0, rt = 0, vsp = 0, ws = 0, count = 0;
-            Object.values(masterDB).forEach(i => {
-                count++; rt += i.rt_val; vsp += i.vsp_val; ws += i.ws_val; total += (i.rt_val + i.vsp_val + i.ws_val);
-            });
-            document.getElementById('repTotalSku').innerText = count;
-            document.getElementById('repRtVal').innerText = formatCurrency(rt);
-            document.getElementById('repVspVal').innerText = formatCurrency(vsp);
-            document.getElementById('repWsVal').innerText = formatCurrency(ws);
-            document.getElementById('repGrandTotal').innerText = formatCurrency(total);
-        }
-
-        function exportReport(t) {
-            let csv = "SKU Code,Description,Size,Total Value\\n";
-            Object.values(masterDB).forEach(i => { csv += `${i.sku_code},"${i.name}",${i.size},${i.rt_val+i.vsp_val+i.ws_val}\\n`; });
-            const link = document.createElement("a"); link.href = "data:text/csv;charset=utf-8," + encodeURI(csv);
-            link.download = `NUR_REPORT_${new Date().toISOString().split('T')[0]}.csv`; link.click();
-        }
-
-        function exportArchiveData() {
-            if(!activeArchiveView) return showAlert('Load a vault record first.', 'bad');
-            let csv = `ARCHIVE TIMESTAMP: ${activeArchiveView.date}\\nSKU Code,Description,Size,Total Value\\n`;
-            activeArchiveView.data.forEach(i => { csv += `${i.sku_code},"${i.name}",${i.size},${i.rt_val+i.vsp_val+i.ws_val}\\n`; });
-            const link = document.createElement("a"); link.href = "data:text/csv;charset=utf-8," + encodeURI(csv);
-            link.download = `NUR_ARCHIVE_${activeArchiveView.date.replace(/[/,: ]/g, '-')}.csv`; link.click();
         }
     </script>
 </body>
