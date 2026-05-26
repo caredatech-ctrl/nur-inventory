@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NUR Enterprises - Master Inventory OS</title>
     
-    <!-- Enterprise Core Processing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Enterprise PDF Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
@@ -18,7 +16,6 @@
     
     <style>
         :root {
-            /* Ultimate Obsidian & Rose-Gold / Magenta Theme */
             --bg-obsidian: #030303; 
             --bg-panel: #0a0a0a;
             --rose-light: #FBCFE8; 
@@ -138,8 +135,8 @@
         .upload-card { background: rgba(0, 0, 0, 0.4); border: 1px dashed var(--rose-dark); padding: 3rem 2rem; border-radius: 12px; text-align: center; }
         .upload-card input[type="file"] { width: 100%; padding: 1rem; background: #000; border-radius: 8px; color: var(--text-muted); margin-bottom: 1rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
         
-        #kpoAuthWall { background: rgba(10, 10, 10, 0.8); border: 1px solid var(--rose-dark); border-radius: 16px; padding: 4rem; text-align: center; max-width: 600px; margin: 0 auto 3rem auto; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        #kpoAuthWall input { width: 100%; padding: 1.2rem; background: #000; border: 1px solid var(--rose-base); border-radius: 8px; color: var(--text-main); font-size: 1.2rem; margin-bottom: 1.5rem; text-align: center; letter-spacing: 3px; }
+        #kpoAuthWall { background: rgba(10, 10, 10, 0.8); border: 1px solid var(--danger); border-radius: 16px; padding: 4rem; text-align: center; max-width: 600px; margin: 0 auto 3rem auto; box-shadow: 0 20px 50px rgba(225,29,72,0.4); }
+        #kpoAuthWall input { width: 100%; padding: 1.2rem; background: #000; border: 1px solid var(--danger); border-radius: 8px; color: var(--text-main); font-size: 1.2rem; margin-bottom: 1.5rem; text-align: center; letter-spacing: 3px; }
         #kpoWorkspace { display: none; }
 
         .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
@@ -151,7 +148,6 @@
 </head>
 <body>
 
-    <!-- SECURE LOGIN FIREWALL -->
     <div id="globalLoginOverlay">
         <div class="login-box">
             <h1>NUR <span>OS</span></h1>
@@ -159,18 +155,16 @@
             <div id="loginError"></div>
             <input type="text" id="loginUsername" placeholder="Username" autocomplete="off">
             <input type="password" id="loginPassword" placeholder="Password" onkeypress="if(event.key === 'Enter') executeLogin()">
-            <button class="btn" onclick="executeLogin()"><i class="fas fa-unlock-alt"></i> Authenticate Session</button>
+            <button class="btn" onclick="executeLogin()"><i class="fas fa-shield-alt"></i> Authenticate Session</button>
         </div>
     </div>
 
-    <!-- 3-SECOND VIP WELCOME OVERLAY -->
     <div id="vipWelcomeOverlay">
         <i class="fas fa-crown fa-5x" style="color:var(--gold-accent);"></i>
         <h1>WELCOME, <span id="vipNameDisplay"></span></h1>
-        <p style="color:var(--rose-light); font-size:1.2rem; margin-top:1rem; letter-spacing:2px;">Establishing secure connection to Global Node...</p>
+        <p style="color:var(--rose-light); font-size:1.2rem; margin-top:1rem; letter-spacing:2px;">Establishing secure encrypted connection...</p>
     </div>
 
-    <!-- MAIN APPLICATION -->
     <div id="appWrapper">
         <header>
             <div>
@@ -178,9 +172,9 @@
                 <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.4rem; letter-spacing: 3px; font-weight: 600; text-transform: uppercase;">Global Live Valuation Engine</div>
             </div>
             <div class="header-meta">
-                <div>Architect: <strong style="letter-spacing: 2px;">DILAWAR ALI</strong></div>
+                <div>Encryption: <strong style="letter-spacing: 2px;">ACTIVE 256-BIT</strong></div>
                 <div id="liveClock" style="margin-top: 0.5rem; font-weight: 600; font-family: monospace; font-size: 1.1rem; color: var(--text-main);"></div>
-                <div id="syncStatus" style="margin-top: 0.5rem; font-size: 0.8rem; color: #34D399; font-weight: 600;"><i class="fas fa-satellite-dish"></i> Connected to Supabase Node</div>
+                <div id="syncStatus" style="margin-top: 0.5rem; font-size: 0.8rem; color: #34D399; font-weight: 600;"><i class="fas fa-lock"></i> Session Authenticated</div>
             </div>
         </header>
 
@@ -197,13 +191,11 @@
         <main>
             <div id="alertBox"></div>
 
-            <!-- Dashboard Title / Pink Glass -->
             <div class="pink-glass-banner">
                 <h3><i class="fas fa-gem"></i> Area Sales Manager</h3>
                 <h2>Miss Rida Nawaz</h2>
             </div>
 
-            <!-- 1. DASHBOARD -->
             <div id="dashboard" class="panel active">
                 <h2 class="panel-title"><i class="fas fa-table"></i> Live Master Valuation Control</h2>
                 <div class="search-wrapper">
@@ -223,13 +215,12 @@
                             </tr>
                         </thead>
                         <tbody id="inventoryBody">
-                            <tr><td colspan="6" style="text-align:center; padding:5rem; color:var(--text-muted);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Syncing from Live Database...</td></tr>
+                            <tr><td colspan="6" style="text-align:center; padding:5rem; color:var(--text-muted);"><i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Syncing from Secure Node...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- 2. EXECUTIVE BOARDROOM -->
             <div id="executive" class="panel">
                 <h2 class="panel-title"><i class="fas fa-crown"></i> Board of Directors View</h2>
                 
@@ -256,7 +247,6 @@
                 </div>
             </div>
 
-            <!-- 3. AI SMART CHARTS -->
             <div id="analytics" class="panel">
                 <h2 class="panel-title"><i class="fas fa-chart-pie"></i> AI Smart Analytics & Trends</h2>
                 <div class="analytics-grid">
@@ -271,7 +261,6 @@
                 </div>
             </div>
 
-            <!-- 4. EXECUTIVE EXPORTS (Excel & PDF) -->
             <div id="reports" class="panel">
                 <h2 class="panel-title"><i class="fas fa-file-export"></i> Top-Level Financial Reporting</h2>
                 
@@ -292,7 +281,6 @@
                 </div>
             </div>
 
-            <!-- 5. USER MANAGEMENT (Admin Only - Full Detail Edit) -->
             <div id="users" class="panel">
                 <h2 class="panel-title"><i class="fas fa-users-cog"></i> Global Access Management</h2>
                 <p style="color:var(--rose-light); margin-bottom: 2rem;">Passwords are strictly visible below to the Master Admin. You can create or fully update any user's credentials instantly.</p>
@@ -318,11 +306,10 @@
                 </div>
             </div>
 
-            <!-- 6. INGESTION (With Secondary Password Wall) -->
             <div id="upload" class="panel">
                 <h2 class="panel-title"><i class="fas fa-server"></i> Data-Shape DNA Scanner</h2>
                 <div id="kpoAuthWall">
-                    <h3 style="color: var(--danger); margin-bottom: 1rem; font-weight: 600;"><i class="fas fa-shield-alt"></i> KPO Authorization Required</h3>
+                    <h3 style="color: var(--danger); margin-bottom: 1rem; font-weight: 600;"><i class="fas fa-shield-alt"></i> Secondary Auth Required</h3>
                     <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Database injection requires secondary security clearance.</p>
                     <input type="password" id="kpoPass" placeholder="Secondary Password" onkeypress="if(event.key === 'Enter') authKPO()">
                     <button class="btn" onclick="authKPO()" style="width: 100%; justify-content: center;"><i class="fas fa-unlock"></i> Unlock Uploader</button>
@@ -346,7 +333,7 @@
                         </div>
                     </div>
                     <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 3rem;">
-                        <button class="btn" onclick="commitDailyWipeAndUpdate()"><i class="fas fa-cloud-upload-alt"></i> Execute Global Server Sync</button>
+                        <button id="syncApiBtn" class="btn" onclick="commitDailyWipeAndUpdate()"><i class="fas fa-cloud-upload-alt"></i> Execute Global Server Sync</button>
                     </div>
                 </div>
             </div>
@@ -363,47 +350,62 @@
         let tempIngestion = { rt: null, vsp: null, ws: null };
         let chartInstances = {}; 
         let currentSessionUser = null;
-        let editingUserId = null; // Track if we are creating or updating a user
+        let editingUserId = null;
+        
+        // Timeout variables
+        let idleTime = 0;
+        const IDLE_LIMIT = 5 * 60 * 1000; // 5 Minutes
+        let isSyncing = false; // API Throttle lock
 
         window.onload = () => {
             startClock();
+            startIdleTimer();
         };
 
         function startClock() {
             setInterval(() => { document.getElementById('liveClock').innerText = new Date().toLocaleString('en-US', { timeZone: 'Asia/Karachi' }); }, 1000);
         }
 
-        // --- CORE AUTHENTICATION ENGINE & VIP WELCOME ---
+        // --- IDLE TIMEOUT SECURITY (5 Minutes) ---
+        function resetIdleTimer() { idleTime = 0; }
+        
+        function startIdleTimer() {
+            window.onmousemove = resetIdleTimer;
+            window.onmousedown = resetIdleTimer;
+            window.onclick = resetIdleTimer;
+            window.onkeydown = resetIdleTimer;
+            window.addEventListener('scroll', resetIdleTimer, true);
+
+            setInterval(() => {
+                if(currentSessionUser) {
+                    idleTime += 1000;
+                    if (idleTime >= IDLE_LIMIT) { executeLogout(true); }
+                }
+            }, 1000);
+        }
+
+        // --- CORE AUTHENTICATION & VIP WELCOME ---
         async function executeLogin() {
             const u = document.getElementById('loginUsername').value.trim();
             const p = document.getElementById('loginPassword').value.trim();
             const errBox = document.getElementById('loginError');
             
-            if(!u || !p) {
-                errBox.innerText = "Error: Username and Password required.";
-                return;
-            }
+            if(!u || !p) { errBox.innerText = "Error: Username and Password required."; return; }
 
-            // 1000% BULLETPROOF MASTER BYPASS
+            // HARDCODED MASTER BYPASS
             if(u === 'admin' && p === 'NurAdmin@2026') {
                 currentSessionUser = { username: 'admin', role: 'master', full_name: 'Master Architect Dilawar Ali' };
                 triggerVIPWelcome();
                 return;
             }
 
-            // Standard Database Auth
             try {
                 const { data, error } = await db.from('nur_users').select('*').eq('username', u).eq('password', p).single();
-                
                 if (data) {
                     currentSessionUser = data;
                     triggerVIPWelcome();
-                } else {
-                    errBox.innerText = "Authorization Denied. Invalid Credentials.";
-                }
-            } catch (err) {
-                errBox.innerText = "Database connection fault. Use Master Override.";
-            }
+                } else { errBox.innerText = "Authorization Denied. Invalid Credentials."; }
+            } catch (err) { errBox.innerText = "Database connection fault. Use Master Override."; }
         }
 
         function triggerVIPWelcome() {
@@ -416,7 +418,6 @@
             
             welcomeLayer.style.display = 'flex';
             
-            // 3 Second Cinematic Delay
             setTimeout(() => {
                 welcomeLayer.style.display = 'none';
                 unlockApplication();
@@ -424,6 +425,7 @@
         }
 
         async function unlockApplication() {
+            resetIdleTimer();
             document.getElementById('appWrapper').style.display = 'flex';
             
             if(currentSessionUser.role === 'master') {
@@ -436,12 +438,21 @@
             switchPanel('dashboard');
         }
 
-        function executeLogout() {
+        function executeLogout(isTimeout = false) {
             currentSessionUser = null;
             document.getElementById('appWrapper').style.display = 'none';
             document.getElementById('globalLoginOverlay').style.display = 'flex';
             document.getElementById('loginPassword').value = '';
             document.getElementById('tab-users').style.display = 'none';
+            
+            // Relock KPO wall
+            document.getElementById('kpoAuthWall').style.display = 'block';
+            document.getElementById('kpoWorkspace').style.display = 'none';
+            document.getElementById('kpoPass').value = '';
+
+            const errBox = document.getElementById('loginError');
+            if(isTimeout) { errBox.innerText = "Session Expired: Auto-Logout due to 5 minutes of inactivity."; } 
+            else { errBox.innerText = "Session Terminated Securely."; }
         }
 
         // --- ADVANCED USER MANAGEMENT ---
@@ -451,10 +462,7 @@
             const tbody = document.getElementById('usersTableBody');
             tbody.innerHTML = '';
             
-            if(error) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger);">Error: 'nur_users' SQL table not found.</td></tr>`;
-                return;
-            }
+            if(error) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger);">Error: 'nur_users' SQL table not found.</td></tr>`; return; }
 
             if(data) {
                 data.forEach(u => {
@@ -511,17 +519,14 @@
             if(!u || !p) return showAlert('Username and Password are required.', 'bad');
 
             if(editingUserId) {
-                // Update
                 const { error } = await db.from('nur_users').update({ full_name: f, username: u, password: p, role: r }).eq('id', editingUserId);
                 if(error) return showAlert('Update failed.', 'bad');
                 showAlert('User Credentials Updated', 'good');
             } else {
-                // Insert
                 const { error } = await db.from('nur_users').insert([{ full_name: f, username: u, password: p, role: r }]);
                 if(error) return showAlert('Creation failed (Username might already exist).', 'bad');
                 showAlert('Access Provisioned Successfully', 'good');
             }
-            
             cancelUserEdit();
             loadUsers();
         }
@@ -535,6 +540,11 @@
 
         // --- UI NAVIGATION ---
         window.switchPanel = function(panelId) {
+            // LAYER 2: RBAC Protection for Upload
+            if(panelId === 'upload' && currentSessionUser.role !== 'master') {
+                return showAlert('SECURITY CLEARANCE DENIED: Master Admin Access Required for DNA Ingestion.', 'bad');
+            }
+
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.getElementById(panelId).classList.add('active');
@@ -555,7 +565,7 @@
             setTimeout(() => box.style.display = 'none', 5000);
         }
 
-        // --- MATH & UTILS ---
+        // --- UTILS ---
         function formatCurrency(val) { return "Rs " + val.toLocaleString('en-US', {minimumFractionDigits: 2}); }
         function formatQty(c, p) { return (c === 0 && p === 0) ? "0/0" : `${c}/${p}`; }
         function formatToMillionsWords(val) {
@@ -581,19 +591,17 @@
             finally { renderTable(); }
         }
 
-        // --- DNA UPLOAD KPO AUTH ---
+        // --- UPLOAD SEC AUTH ---
         function authKPO() {
             const pass = document.getElementById('kpoPass').value;
             if (pass === 'Aa135135%') {
                 document.getElementById('kpoAuthWall').style.display = 'none';
                 document.getElementById('kpoWorkspace').style.display = 'block';
                 showAlert('Secondary Security Cleared. Uploader Online.', 'good');
-            } else {
-                showAlert('Incorrect Secondary Password.', 'bad');
-            }
+            } else { showAlert('Incorrect Secondary Password.', 'bad'); }
         }
 
-        // --- INGESTION SCANNER ---
+        // --- INGESTION & API THROTTLING ---
         function extractSKUSize(desc) {
             const regex = /(\d+(?:\.\d+)?\s*(?:ML|G|KG|LTR|L|GM|OZ|MG|GRAM|LITER))/i;
             const match = desc.match(regex);
@@ -660,16 +668,17 @@
         }
 
         async function commitDailyWipeAndUpdate() {
-            if(currentSessionUser.role !== 'master') return showAlert("Only Master Admins can inject data.", "bad");
+            // API Throttling & DDoS Protection check
+            if(isSyncing) return showAlert("API Request blocked. Transaction already in progress.", "bad");
             
-            showAlert('Syncing tables to Global Node...', 'sync');
+            isSyncing = true;
+            document.getElementById('syncApiBtn').innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing Secure Transaction...`;
+            
             try {
                 let newDB = {};
-                let itemsExtracted = 0;
                 ['rt', 'vsp', 'ws'].forEach(ch => {
                     if(tempIngestion[ch]) {
                         tempIngestion[ch].forEach(item => {
-                            itemsExtracted++;
                             if(!newDB[item.code]) {
                                 newDB[item.code] = { sku_code: item.code, name: item.name, size: item.size, rt_c: 0, rt_p: 0, rt_val: 0, vsp_c: 0, vsp_p: 0, vsp_val: 0, ws_c: 0, ws_p: 0, ws_val: 0 };
                             }
@@ -699,7 +708,13 @@
                 await loadLiveServerData();
                 switchPanel('dashboard');
                 showAlert('Global Sync Complete! Database is live.', 'good');
-            } catch (err) { showAlert('CRITICAL FAIL: ' + err.message, 'bad'); }
+            } catch (err) { 
+                showAlert('CRITICAL FAIL: ' + err.message, 'bad'); 
+            } finally {
+                // Release API lock
+                isSyncing = false;
+                document.getElementById('syncApiBtn').innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Execute Global Server Sync`;
+            }
         }
 
         // --- DASHBOARD RENDER ---
@@ -756,7 +771,7 @@
             document.getElementById('execWsWords').innerText = formatToMillionsWords(wsVal);
         }
 
-        // --- SMART AI CHARTS (BRANDS & TOP 7) ---
+        // --- SMART AI CHARTS ---
         function renderAnalytics() {
             if(chartInstances.topSkus) chartInstances.topSkus.destroy();
             if(chartInstances.brands) chartInstances.brands.destroy();
@@ -797,7 +812,7 @@
             });
         }
 
-        // --- ENTERPRISE EXCEL EXPORT ---
+        // --- ENTERPRISE EXPORTS ---
         function exportEnterpriseExcel() {
             if(Object.keys(masterDB).length === 0) return showAlert('No data to export.', 'bad');
             showAlert('Generating Executive Excel Report...', 'good');
@@ -830,7 +845,6 @@
             XLSX.writeFile(wb, `NUR_Executive_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
 
-        // --- ENTERPRISE PDF EXPORT ---
         function exportEnterprisePDF() {
             if(Object.keys(masterDB).length === 0) return showAlert('No data to export.', 'bad');
             showAlert('Generating Formatted PDF...', 'good');
@@ -838,16 +852,15 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape'); 
             
-            // Modern PDF Header
             doc.setFillColor(10, 10, 10);
             doc.rect(0, 0, 300, 28, 'F');
-            doc.setTextColor(244, 114, 182); // Rose Base
+            doc.setTextColor(244, 114, 182); 
             doc.setFontSize(18);
             doc.text("NUR ENTERPRISES", 14, 12);
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(10);
             doc.text("Area Sales Manager: Miss Rida Nawaz | Generated: " + new Date().toLocaleString(), 14, 18);
-            doc.setTextColor(212, 175, 55); // Gold
+            doc.setTextColor(212, 175, 55); 
             doc.setFontSize(9);
             doc.text("MASTER VALUATION LEDGER (WITH IN-HAND QTY)", 14, 24);
 
